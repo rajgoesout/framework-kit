@@ -3,6 +3,9 @@ import { useSolTransfer, useWalletSession } from '@solana/react-hooks';
 import { FormEvent, useEffect, useState } from 'react';
 
 import { formatTransferFeedback } from './demoUi';
+import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
 
 export function SolTransferForm() {
     const session = useWalletSession();
@@ -44,46 +47,58 @@ export function SolTransferForm() {
     const isWalletConnected = Boolean(session);
 
     return (
-        <section aria-disabled={!isWalletConnected} className="card">
-            <h2>SOL Transfer</h2>
-            <p>
-                The <code>useSolTransfer</code> hook wraps the underlying helper, manages status, and exposes the latest
-                signature so you only worry about form inputs.
-            </p>
-            <form onSubmit={handleSubmit}>
-                <fieldset disabled={!isWalletConnected}>
-                    <label>
-                        Destination
-                        <input
-                            autoComplete="off"
-                            onChange={event => setDestination(event.target.value)}
-                            placeholder="Recipient address"
-                            value={destination}
-                        />
-                    </label>
-                    <label>
-                        Amount (SOL)
-                        <input
-                            autoComplete="off"
-                            min="0"
-                            onChange={event => setAmount(event.target.value)}
-                            placeholder="0.01"
-                            step="0.0001"
-                            type="number"
-                            value={amount}
-                        />
-                    </label>
-                    <div className="row">
-                        <button disabled={!session || isSending} type="submit">
-                            {isSending ? 'Sending…' : 'Send SOL'}
-                        </button>
-                        <button disabled={status === 'idle'} onClick={reset} type="button">
-                            Reset
-                        </button>
-                    </div>
-                </fieldset>
-            </form>
-            <div className="log">{feedback}</div>
-        </section>
+        <Card aria-disabled={!isWalletConnected}>
+            <CardHeader>
+                <div className="space-y-1.5">
+                    <CardTitle>SOL Transfer</CardTitle>
+                    <CardDescription>
+                        The <code>useSolTransfer</code> hook wraps the underlying helper, manages status, and exposes the
+                        latest signature so you only worry about form inputs.
+                    </CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <form className="grid gap-4" onSubmit={handleSubmit}>
+                    <fieldset className="grid gap-4" disabled={!isWalletConnected}>
+                        <div className="space-y-2">
+                            <label htmlFor="sol-destination">Destination</label>
+                            <Input
+                                autoComplete="off"
+                                id="sol-destination"
+                                onChange={event => setDestination(event.target.value)}
+                                placeholder="Recipient address"
+                                value={destination}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="sol-amount">Amount (SOL)</label>
+                            <Input
+                                autoComplete="off"
+                                id="sol-amount"
+                                min="0"
+                                onChange={event => setAmount(event.target.value)}
+                                placeholder="0.01"
+                                step="0.0001"
+                                type="number"
+                                value={amount}
+                            />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Button disabled={!session || isSending} type="submit">
+                                {isSending ? 'Sending…' : 'Send SOL'}
+                            </Button>
+                            <Button disabled={status === 'idle'} onClick={reset} type="button" variant="ghost">
+                                Reset
+                            </Button>
+                        </div>
+                    </fieldset>
+                </form>
+            </CardContent>
+            <CardFooter>
+                <div aria-live="polite" className="log-panel w-full">
+                    {feedback}
+                </div>
+            </CardFooter>
+        </Card>
     );
 }

@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --radius: 0.625rem;
+    --font-sans: 'Inter', 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+        'Courier New', monospace;
+    --background: 1 0 0;
+    --foreground: 0.141 0.005 285.823;
+    --card: 1 0 0;
+    --card-foreground: 0.141 0.005 285.823;
+    --popover: 1 0 0;
+    --popover-foreground: 0.141 0.005 285.823;
+    --primary: 0.21 0.006 285.885;
+    --primary-foreground: 0.985 0 0;
+    --secondary: 0.967 0.001 286.375;
+    --secondary-foreground: 0.21 0.006 285.885;
+    --muted: 0.967 0.001 286.375;
+    --muted-foreground: 0.552 0.016 285.938;
+    --accent: 0.967 0.001 286.375;
+    --accent-foreground: 0.21 0.006 285.885;
+    --destructive: 0.577 0.245 27.325;
+    --border: 0.92 0.004 286.32;
+    --input: 0.92 0.004 286.32;
+    --ring: 0.705 0.015 286.067;
+}
+
+.dark {
+    --background: 0.141 0.005 285.823;
+    --foreground: 0.985 0 0;
+    --card: 0.21 0.006 285.885;
+    --card-foreground: 0.985 0 0;
+    --popover: 0.21 0.006 285.885;
+    --popover-foreground: 0.985 0 0;
+    --primary: 0.92 0.004 286.32;
+    --primary-foreground: 0.21 0.006 285.885;
+    --secondary: 0.274 0.006 286.033;
+    --secondary-foreground: 0.985 0 0;
+    --muted: 0.274 0.006 286.033;
+    --muted-foreground: 0.705 0.015 286.067;
+    --accent: 0.274 0.006 286.033;
+    --accent-foreground: 0.985 0 0;
+    --destructive: 0.704 0.191 22.216;
+    --border: 1 0 0;
+    --input: 1 0 0;
+    --ring: 0.552 0.016 285.938;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground font-sans antialiased min-h-screen;
+        background-image: radial-gradient(circle at 20% -10%, rgb(56 189 248 / 0.2), transparent 60%),
+            radial-gradient(circle at 80% 0%, rgb(129 140 248 / 0.2), transparent 60%),
+            linear-gradient(180deg, rgb(15 23 42 / 0.08), transparent);
+    }
+
+    h1 {
+        @apply text-3xl font-semibold tracking-tight;
+    }
+
+    h2 {
+        @apply text-lg font-semibold leading-tight;
+    }
+
+    p {
+        @apply text-sm text-muted-foreground;
+    }
+
+    code {
+        @apply rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[0.75rem] text-secondary-foreground;
+    }
+}
+
+@layer components {
+    .status-badge {
+        @apply inline-flex items-center gap-1 rounded-full border border-input bg-accent/40 px-2.5 py-1 text-xs font-medium text-accent-foreground shadow-sm;
+    }
+
+    .status-badge[data-state='error'] {
+        @apply border-destructive/60 bg-destructive/15 text-destructive;
+    }
+
+    .status-badge[data-state='success'] {
+        @apply border-primary/50 bg-primary/10 text-primary;
+    }
+
+    .log-panel {
+        @apply rounded-lg border border-dashed border-border/60 bg-card/60 p-4 font-mono text-xs text-muted-foreground shadow-inner;
+    }
+
+    fieldset {
+        @apply grid gap-4;
+    }
+
+    label {
+        @apply text-sm font-medium text-foreground;
+    }
+}

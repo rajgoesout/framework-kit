@@ -129,9 +129,16 @@ export function useWalletActions() {
 /**
  * Stable connect helper that resolves to {@link ClientActions.connectWallet}.
  */
-export function useConnectWallet(): (connectorId: string) => Promise<void> {
+export function useConnectWallet(): (
+    connectorId: string,
+    options?: Readonly<{ autoConnect?: boolean }>,
+) => Promise<void> {
     const client = useSolanaClient();
-    return useCallback((connectorId: string) => client.actions.connectWallet(connectorId), [client]);
+    return useCallback(
+        (connectorId: string, options?: Readonly<{ autoConnect?: boolean }>) =>
+            client.actions.connectWallet(connectorId, options),
+        [client],
+    );
 }
 
 /**

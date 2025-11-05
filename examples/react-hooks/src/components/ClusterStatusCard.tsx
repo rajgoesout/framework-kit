@@ -1,5 +1,7 @@
 import { useClusterState, useClusterStatus } from '@solana/react-hooks';
 
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+
 function describeStatus(status: ReturnType<typeof useClusterStatus>): string {
     if (status.status === 'connecting') {
         return 'Dialing RPC and WebSocket endpoints…';
@@ -21,18 +23,37 @@ export function ClusterStatusCard() {
     const label = status.status === 'ready' ? 'Ready' : status.status;
 
     return (
-        <section className="card">
-            <h2>Cluster</h2>
-            <div className={`tag${status.status === 'error' ? ' error' : ''}`}>{label}</div>
-            <p>
-                Endpoint: <code>{cluster.endpoint}</code>
-            </p>
-            {cluster.websocketEndpoint ? (
-                <p>
-                    WebSocket: <code>{cluster.websocketEndpoint}</code>
-                </p>
-            ) : null}
-            <p>{describeStatus(status)}</p>
-        </section>
+        <Card>
+            <CardHeader>
+                <div>
+                    <CardTitle>Cluster</CardTitle>
+                    <CardDescription>Connection state for the configured RPC and WebSocket endpoints.</CardDescription>
+                </div>
+                <CardAction>
+                    <span
+                        aria-live="polite"
+                        className="status-badge"
+                        data-state={status.status === 'error' ? 'error' : 'success'}
+                    >
+                        {label}
+                    </span>
+                </CardAction>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <div className="grid gap-1">
+                    <span className="font-medium text-foreground">Endpoint</span>
+                    <code className="inline-block break-all bg-card px-2 py-1">{cluster.endpoint}</code>
+                </div>
+                {cluster.websocketEndpoint ? (
+                    <div className="grid gap-1">
+                        <span className="font-medium text-foreground">WebSocket</span>
+                        <code className="inline-block break-all bg-card px-2 py-1">
+                            {cluster.websocketEndpoint}
+                        </code>
+                    </div>
+                ) : null}
+                <p className="text-muted-foreground">{describeStatus(status)}</p>
+            </CardContent>
+        </Card>
     );
 }

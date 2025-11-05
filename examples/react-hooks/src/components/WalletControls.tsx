@@ -2,6 +2,9 @@ import type { WalletConnector } from '@solana/client-core';
 import { useConnectWallet, useDisconnectWallet, useWallet, useWalletSession } from '@solana/react-hooks';
 import { useCallback } from 'react';
 
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+
 function formatError(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
@@ -57,42 +60,62 @@ export function WalletControls({ connectors }: Props) {
         wallet.status === 'error' && wallet.error ? formatError(wallet.error) : null;
 
     return (
-        <section className="card">
-            <h2>Wallets</h2>
-            <p>
-                Discover Wallet Standard connectors, connect with wallet actions, and disconnect with a single helper call.
-            </p>
-            <div className="row" aria-live="polite">
-                {connectors.length === 0 ? <span>No Wallet Standard providers detected.</span> : null}
-                {connectors.map(connector => {
-                    const isActive = wallet.status === 'connected' && connector.id === activeConnectorId;
-                    const isBusy = wallet.status === 'connecting' && connector.id === activeConnectorId;
-                    return (
-                        <button
-                            key={connector.id}
-                            disabled={isActive || isBusy}
-                            onClick={() => handleConnect(connector.id)}
-                            title={connector.name}
-                            type="button"
-                        >
-                            {isActive ? `✓ ${connector.name}` : connector.name}
-                        </button>
-                    );
-                })}
-            </div>
-            {session ? (
-                <div className="row">
-                    <button
-                        disabled={wallet.status === 'connecting'}
-                        onClick={handleDisconnect}
-                        type="button"
-                    >
-                        Disconnect
-                    </button>
+        <Card>
+            <CardHeader>
+                <div className="space-y-1.5">
+                    <CardTitle>Wallets</CardTitle>
+                    <CardDescription>
+                        Discover Wallet Standard connectors, connect with wallet actions, and disconnect with a single
+                        helper call.
+                    </CardDescription>
                 </div>
-            ) : null}
-            <p>{statusLabel}</p>
-            {error ? <div className="tag error">{error}</div> : null}
-        </section>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2" aria-live="polite">
+                    {connectors.length === 0 ? (
+                        <span className="rounded-md border border-dashed border-border/70 px-3 py-2 text-sm text-muted-foreground">
+                            No Wallet Standard providers detected.
+                        </span>
+                    ) : null}
+                    {connectors.map(connector => {
+                        const isActive = wallet.status === 'connected' && connector.id === activeConnectorId;
+                        const isBusy = wallet.status === 'connecting' && connector.id === activeConnectorId;
+                        return (
+                            <Button
+                                key={connector.id}
+                                disabled={isActive || isBusy}
+                                onClick={() => handleConnect(connector.id)}
+                                title={connector.name}
+                                type="button"
+                                variant={isActive ? 'secondary' : 'outline'}
+                                className="justify-start"
+                            >
+                                {isActive ? `✓ ${connector.name}` : connector.name}
+                            </Button>
+                        );
+                    })}
+                </div>
+                {session ? (
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            disabled={wallet.status === 'connecting'}
+                            onClick={handleDisconnect}
+                            type="button"
+                            variant="ghost"
+                        >
+                            Disconnect
+                        </Button>
+                    </div>
+                ) : null}
+            </CardContent>
+            <CardFooter className="flex flex-col gap-3 text-sm">
+                <p className="text-muted-foreground">{statusLabel}</p>
+                {error ? (
+                    <span aria-live="polite" className="status-badge" data-state="error">
+                        {error}
+                    </span>
+                ) : null}
+            </CardFooter>
+        </Card>
     );
 }

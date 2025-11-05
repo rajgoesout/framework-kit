@@ -15,3 +15,13 @@ export {
     useWalletStandardConnectors,
 } from './hooks';
 export { useClientStore } from './useClientStore';
+export {
+    useSignAndSendTransaction,
+    useSignIn,
+    useSignMessage,
+    useSignTransaction,
+    useWalletAccountMessageSigner,
+    useWalletAccountTransactionSendingSigner,
+    useWalletAccountTransactionSigner,
+} from './walletStandardHooks';
+export type { OnlySolanaChains } from './walletStandardHooks';

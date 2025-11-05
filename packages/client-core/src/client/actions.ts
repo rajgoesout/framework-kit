@@ -157,7 +157,10 @@ export function createActions({ connectors, logger: inputLogger, runtime, store 
      * @param connectorId - Identifier for the desired wallet connector.
      * @returns Promise that resolves once the connection attempt has completed.
      */
-    async function connectWallet(connectorId: string): Promise<void> {
+    async function connectWallet(
+        connectorId: string,
+        options: Readonly<{ autoConnect?: boolean }> = {},
+    ): Promise<void> {
         const connector = connectors.get(connectorId);
         if (!connector) {
             throw new Error(`No wallet connector registered for id "${connectorId}".`);
@@ -171,7 +174,7 @@ export function createActions({ connectors, logger: inputLogger, runtime, store 
             wallet: { connectorId, status: 'connecting' },
         }));
         try {
-            const session = await connector.connect();
+            const session = await connector.connect(options);
             store.setState(state => ({
                 ...state,
                 lastUpdatedAt: now(),

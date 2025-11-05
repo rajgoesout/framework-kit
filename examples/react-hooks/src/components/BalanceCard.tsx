@@ -2,6 +2,9 @@ import { lamportsToSolString } from '@solana/client-core';
 import { useBalance, useWallet } from '@solana/react-hooks';
 import { ChangeEvent, useEffect, useState } from 'react';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Input } from './ui/input';
+
 function formatError(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
@@ -37,27 +40,55 @@ export function BalanceCard() {
         balance.lamports !== null ? `${lamportsToSolString(balance.lamports)} SOL` : 'Balance unavailable.';
 
     return (
-        <section className="card">
-            <h2>Account Balance</h2>
-            <p>
-                Provide an address and <code>useBalance</code> keeps the lamport cache in sync with your client store.
-            </p>
-            <label>
-                Address
-                <input
-                    autoComplete="off"
-                    onChange={handleChange}
-                    placeholder="Base58 address"
-                    value={address}
-                />
-            </label>
-            <div>
-                <div>Lamports: {formatLamports(balance.lamports)}</div>
-                <div>SOL: {solDisplay}</div>
-                <div>Status: {balance.fetching ? 'Fetching…' : 'Idle'}</div>
-                {balance.slot !== undefined && balance.slot !== null ? <div>Slot: {balance.slot.toString()}</div> : null}
-            </div>
-            {balance.error ? <div className="tag error">{formatError(balance.error)}</div> : null}
-        </section>
+        <Card>
+            <CardHeader>
+                <div className="space-y-1.5">
+                    <CardTitle>Account Balance</CardTitle>
+                    <CardDescription>
+                        Provide an address and <code>useBalance</code> keeps the lamport cache in sync with your client
+                        store.
+                    </CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+                <div className="space-y-2">
+                    <label htmlFor="balance-account">Address</label>
+                    <Input
+                        autoComplete="off"
+                        id="balance-account"
+                        onChange={handleChange}
+                        placeholder="Base58 address"
+                        value={address}
+                    />
+                </div>
+                <div className="grid gap-1 text-sm">
+                    <div className="flex items-center justify-between text-muted-foreground">
+                        <span>Lamports</span>
+                        <span className="font-medium text-foreground">{formatLamports(balance.lamports)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                        <span>SOL</span>
+                        <span className="font-medium text-foreground">{solDisplay}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                        <span>Status</span>
+                        <span className="font-medium text-foreground">
+                            {balance.fetching ? 'Fetching…' : 'Idle'}
+                        </span>
+                    </div>
+                    {balance.slot !== undefined && balance.slot !== null ? (
+                        <div className="flex items-center justify-between text-muted-foreground">
+                            <span>Slot</span>
+                            <span className="font-medium text-foreground">{balance.slot.toString()}</span>
+                        </div>
+                    ) : null}
+                </div>
+                {balance.error ? (
+                    <span aria-live="polite" className="status-badge" data-state="error">
+                        {formatError(balance.error)}
+                    </span>
+                ) : null}
+            </CardContent>
+        </Card>
     );
 }

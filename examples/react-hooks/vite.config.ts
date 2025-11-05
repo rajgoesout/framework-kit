@@ -3,4 +3,15 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        alias: [
+            {
+                find: '@solana/client-poc',
+                replacement: '@solana/client-core',
+            },
+        ],
+    },
+    optimizeDeps: {
+        include: ['@solana/client-core', '@solana/react-hooks'],
+    },
 });

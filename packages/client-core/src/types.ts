@@ -199,7 +199,7 @@ export type WatchSubscription = Readonly<{
 }>;
 
 export type ClientActions = Readonly<{
-    connectWallet(connectorId: string): Promise<void>;
+    connectWallet(connectorId: string, options?: Readonly<{ autoConnect?: boolean }>): Promise<void>;
     disconnectWallet(): Promise<void>;
     fetchAccount(address: Address, commitment?: Commitment): Promise<AccountCacheEntry>;
     fetchBalance(address: Address, commitment?: Commitment): Promise<Lamports>;
