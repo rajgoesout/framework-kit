@@ -6,7 +6,7 @@ import { now } from '../utils';
 import { createWalletRegistry } from '../wallet/registry';
 import { createActions } from './actions';
 import { createClientStore, createInitialClientState } from './createClientStore';
-import { createClientHelpers } from './helpers';
+import { createClientHelpers } from './createClientHelpers';
 import { createWatchers } from './watchers';
 
 /**
@@ -61,15 +61,23 @@ export function createClient(config: SolanaClientConfig): SolanaClient {
 		config,
 		connectors,
 		destroy,
-		helpers,
+		get helpers() {
+			return helpers;
+		},
 		runtime,
 		store,
-		solTransfer: helpers.solTransfer,
-		SolTransfer: helpers.solTransfer,
+		get solTransfer() {
+			return helpers.solTransfer;
+		},
+		get SolTransfer() {
+			return helpers.solTransfer;
+		},
 		splToken: helpers.splToken,
 		SplToken: helpers.splToken,
 		SplHelper: helpers.splToken,
-		transaction: helpers.transaction,
+		get transaction() {
+			return helpers.transaction;
+		},
 		watchers,
 	};
 }

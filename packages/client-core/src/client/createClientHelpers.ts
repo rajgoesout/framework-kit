@@ -2,12 +2,11 @@ import type { Commitment } from '@solana/kit';
 
 import { createSolTransferHelper, type SolTransferHelper } from '../features/sol';
 import { createSplTokenHelper, type SplTokenHelper, type SplTokenHelperConfig } from '../features/spl';
-import { createTransactionHelper } from '../features/transactions';
+import { createTransactionHelper, type TransactionHelper } from '../features/transactions';
 import type { ClientHelpers, ClientStore, SolanaClientRuntime } from '../types';
 
 type SplTokenCacheEntry = Readonly<{
 	baseCommitment?: Commitment;
-	helper: SplTokenHelper;
 	scoped: SplTokenHelper;
 }>;
 
@@ -76,9 +75,23 @@ function serialiseSplConfig(config: SplTokenHelperConfig): string {
 
 export function createClientHelpers(runtime: SolanaClientRuntime, store: ClientStore): ClientHelpers {
 	const getFallbackCommitment = () => store.getState().cluster.commitment;
-	const solTransfer = wrapSolTransferHelper(createSolTransferHelper(runtime), getFallbackCommitment);
-	const transaction = createTransactionHelper(runtime, getFallbackCommitment);
 	const splTokenCache = new Map<string, SplTokenCacheEntry>();
+	let solTransfer: SolTransferHelper | undefined;
+	let transaction: TransactionHelper | undefined;
+
+	const getSolTransfer = () => {
+		if (!solTransfer) {
+			solTransfer = wrapSolTransferHelper(createSolTransferHelper(runtime), getFallbackCommitment);
+		}
+		return solTransfer;
+	};
+
+	const getTransaction = () => {
+		if (!transaction) {
+			transaction = createTransactionHelper(runtime, getFallbackCommitment);
+		}
+		return transaction;
+	};
 
 	function getSplTokenHelper(config: SplTokenHelperConfig): SplTokenHelper {
 		const cacheKey = serialiseSplConfig(config);
@@ -90,15 +103,18 @@ export function createClientHelpers(runtime: SolanaClientRuntime, store: ClientS
 		const scoped = wrapSplTokenHelper(helper, getFallbackCommitment, config.commitment);
 		splTokenCache.set(cacheKey, {
 			baseCommitment: config.commitment,
-			helper,
 			scoped,
 		});
 		return scoped;
 	}
 
 	return Object.freeze({
-		solTransfer,
+		get solTransfer() {
+			return getSolTransfer();
+		},
 		splToken: getSplTokenHelper,
-		transaction,
+		get transaction() {
+			return getTransaction();
+		},
 	});
 }
