@@ -14,6 +14,8 @@ export {
 	useWalletSession,
 	useWalletStandardConnectors,
 } from './hooks';
+export { SolanaQueryProvider } from './QueryProvider';
+export { useLatestBlockhash, useProgramAccounts, useSimulateTransaction } from './queryHooks';
 export { useClientStore } from './useClientStore';
 export type { OnlySolanaChains } from './walletStandardHooks';
 export {

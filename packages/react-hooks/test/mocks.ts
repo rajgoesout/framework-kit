@@ -73,6 +73,28 @@ export type MockSolanaClientOptions = Readonly<{
 type MockWatchSubscription = ReturnType<ClientWatchers['watchAccount']>;
 
 const DEFAULT_ENDPOINT: ClusterUrl = 'http://localhost:8899' as ClusterUrl;
+type RpcPlan<T> = {
+	send: MockedFunction<() => Promise<T>>;
+};
+
+function createRpcPlan<T>(value: T): RpcPlan<T> {
+	return {
+		send: vi.fn(async () => value),
+	};
+}
+
+function createDefaultRpc(): SolanaClient['runtime']['rpc'] {
+	return {
+		getLatestBlockhash: vi.fn(() =>
+			createRpcPlan({
+				context: { slot: 0n },
+				value: { blockhash: 'mock-blockhash', lastValidBlockHeight: 0n },
+			}),
+		),
+		getProgramAccounts: vi.fn(() => createRpcPlan([])),
+		simulateTransaction: vi.fn(() => createRpcPlan({ value: { logs: [] } })),
+	} as unknown as SolanaClient['runtime']['rpc'];
+}
 
 function createMockWatchSubscription(): MockWatchSubscription {
 	return {
@@ -269,7 +291,7 @@ export function createMockSolanaClient(options: MockSolanaClientOptions = {}): M
 	const config = normaliseConfig(options.config);
 
 	const runtime = {
-		rpc: options.runtime?.rpc ?? ({} as SolanaClient['runtime']['rpc']),
+		rpc: options.runtime?.rpc ?? createDefaultRpc(),
 		rpcSubscriptions: options.runtime?.rpcSubscriptions ?? ({} as SolanaClient['runtime']['rpcSubscriptions']),
 	};
 

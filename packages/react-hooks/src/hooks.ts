@@ -21,14 +21,14 @@ import {
 	type WalletStatus,
 	watchWalletStandardConnectors,
 } from '@solana/client-core';
-import { type Address, type Commitment, type Lamports, address as parseAddress, type Signature } from '@solana/kit';
+import type { Commitment, Lamports, Signature } from '@solana/kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { useSolanaClient } from './context';
+import { type LatestBlockhashQueryResult, type UseLatestBlockhashOptions, useLatestBlockhash } from './queryHooks';
 import { useClientStore } from './useClientStore';
-
-type AddressLike = Address | string;
+import { type AddressLike, toAddress } from './utils/address';
 
 type ClusterState = ClientState['cluster'];
 type ClusterStatus = ClientState['cluster']['status'];
@@ -57,10 +57,6 @@ type UseBalanceOptions = Readonly<{
 	watch?: boolean;
 }> &
 	UseAccountOptions;
-
-function toAddress(addressLike: AddressLike): Address {
-	return typeof addressLike === 'string' ? parseAddress(addressLike) : addressLike;
-}
 
 function createClusterSelector(): (state: ClientState) => ClusterState {
 	return (state) => state.cluster;
@@ -470,6 +466,7 @@ type TransactionInstructionList = readonly TransactionInstructionInput[];
 
 type UseTransactionPoolConfig = Readonly<{
 	instructions?: TransactionInstructionList;
+	latestBlockhash?: UseLatestBlockhashOptions;
 }>;
 
 type UseTransactionPoolPrepareOptions = Readonly<
@@ -517,6 +514,7 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 	): Promise<TransactionSignature>;
 	sign(options?: UseTransactionPoolSignOptions): ReturnType<TransactionHelper['sign']>;
 	toWire(options?: UseTransactionPoolSignOptions): ReturnType<TransactionHelper['toWire']>;
+	latestBlockhash: LatestBlockhashQueryResult;
 }> {
 	const initialInstructions = useMemo<TransactionInstructionList>(
 		() => config.instructions ?? [],
@@ -524,6 +522,8 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 	);
 	const client = useSolanaClient();
 	const helper = client.helpers.transaction;
+	const latestBlockhash = useLatestBlockhash(config.latestBlockhash);
+	const blockhashMaxAgeMs = config.latestBlockhash?.refreshInterval ?? 30_000;
 	const [instructions, setInstructions] = useState<TransactionInstructionInput[]>(() => [...initialInstructions]);
 	const [prepared, setPrepared] = useState<TransactionPrepared | null>(null);
 	const [prepareState, setPrepareState] = useState<AsyncState<TransactionPrepared>>(() =>
@@ -532,6 +532,18 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 	const [sendState, setSendState] = useState<AsyncState<TransactionSignature>>(() =>
 		createInitialAsyncState<TransactionSignature>(),
 	);
+	const latestBlockhashData = latestBlockhash.data;
+	const latestBlockhashUpdatedAt = latestBlockhash.dataUpdatedAt;
+
+	const resolveCachedLifetime = useCallback(() => {
+		if (!latestBlockhashData?.value || !latestBlockhashUpdatedAt) {
+			return undefined;
+		}
+		if (Date.now() - latestBlockhashUpdatedAt > blockhashMaxAgeMs) {
+			return undefined;
+		}
+		return latestBlockhashData.value;
+	}, [blockhashMaxAgeMs, latestBlockhashData, latestBlockhashUpdatedAt]);
 
 	useEffect(() => {
 		setInstructions([...initialInstructions]);
@@ -585,7 +597,10 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 					...(rest as Omit<TransactionPrepareRequest, 'instructions'>),
 					instructions: nextInstructions,
 				};
-				const nextPrepared = await helper.prepare(request);
+				const cachedLifetime = request.lifetime ?? resolveCachedLifetime();
+				const requestWithLifetime =
+					cachedLifetime && !request.lifetime ? { ...request, lifetime: cachedLifetime } : request;
+				const nextPrepared = await helper.prepare(requestWithLifetime);
 				setPrepared(nextPrepared);
 				setPrepareState({ data: nextPrepared, status: 'success' });
 				return nextPrepared;
@@ -594,7 +609,7 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 				throw error;
 			}
 		},
-		[helper, instructions],
+		[helper, instructions, resolveCachedLifetime],
 	);
 
 	const sign = useCallback(
@@ -653,9 +668,12 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 			}
 			setSendState({ status: 'loading' });
 			try {
+				const cachedLifetime = rest.lifetime ?? resolveCachedLifetime();
+				const restWithLifetime =
+					cachedLifetime && !rest.lifetime ? { ...rest, lifetime: cachedLifetime } : rest;
 				const signature = await helper.prepareAndSend(
 					{
-						...(rest as Omit<TransactionPrepareAndSendRequest, 'instructions'>),
+						...(restWithLifetime as Omit<TransactionPrepareAndSendRequest, 'instructions'>),
 						instructions: nextInstructions,
 					},
 					sendOptions,
@@ -667,7 +685,7 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 				throw error;
 			}
 		},
-		[helper, instructions],
+		[helper, instructions, resolveCachedLifetime],
 	);
 
 	const isPreparing = prepareState.status === 'loading';
@@ -694,5 +712,6 @@ export function useTransactionPool(config: UseTransactionPoolConfig = {}): Reado
 		prepareAndSend,
 		sign,
 		toWire,
+		latestBlockhash,
 	};
 }

@@ -4,6 +4,7 @@ import { act, render as rtlRender, renderHook as rtlRenderHook, screen, waitFor,
 import type { ReactElement, ReactNode } from 'react';
 
 import { SolanaClientProvider } from '../src/context';
+import { SolanaQueryProvider } from '../src/QueryProvider';
 import { createMockSolanaClient, type MockSolanaClient, type MockSolanaClientOptions } from './mocks';
 
 type ClientConfig = Readonly<{
@@ -24,7 +25,11 @@ function resolveClient(options?: ClientConfig): MockSolanaClient {
 }
 
 export function TestSolanaClientProvider({ children, client }: TestProviderProps) {
-	return <SolanaClientProvider client={client}>{children}</SolanaClientProvider>;
+	return (
+		<SolanaClientProvider client={client}>
+			<SolanaQueryProvider>{children}</SolanaQueryProvider>
+		</SolanaClientProvider>
+	);
 }
 
 type RenderWithClientOptions = Omit<RenderOptions, 'wrapper'> & ClientConfig;

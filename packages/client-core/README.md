@@ -1,83 +1,78 @@
 # @solana/client-core
 
-> Framework-agnostic Solana client orchestration layer that wraps `@solana/kit` primitives with a higher-level API inspired by modern web3 client tooling.
+Framework-agnostic building blocks for Solana RPC, subscriptions, wallets, and transactions. Works
+in any runtime (React, Svelte, API routes, workers, etc.).
 
-This package is not meant for production yet. It showcases the building blocks for a future `@solana/client` release:
+> **Status:** Experimental – expect rapid iteration.
 
-- A headless client factory that bootstraps RPC transports, subscriptions, and a composable state store.
-- Framework agnostic actions and watchers that make building Solana experiences less verbose.
-- Optional Zustand integration so apps can opt-in to a ready-made store or supply their own.
-- Wallet Standard helpers (`createWalletStandardConnector`, `watchWalletStandardConnectors`) so you can surface browser wallets without adopting a framework-specific adapter.
+## Install
 
-## Transaction helper
+```bash
+pnpm add @solana/client-core
+```
 
-`client.helpers.transaction` wraps the verbose transaction-building plumbing (`@solana/kit`, wallet sessions, compute budget math) into composable methods:
-
-- `prepare` – build a `TransactionMessage` from arbitrary instructions.
-- `sign`/`toWire` – sign or serialize a prepared transaction.
-- `send` – submit a prepared transaction (partial or full send).
-- `prepareAndSend` – new convenience that chains the entire flow and automatically tunes compute units via `prepareTransaction`.
-
-### Compute-unit aware prepare + send
+## Quick start
 
 ```ts
 import { createClient } from '@solana/client-core';
 
-const client = createClient({ endpoint: 'https://api.devnet.solana.com' });
+const client = createClient({
+	endpoint: 'https://api.devnet.solana.com',
+});
 
-const signature = await client.helpers.transaction.prepareAndSend(
-	{
-		authority: walletSession,
-		instructions: [myInstruction],
-		prepareTransaction: {
-			computeUnitLimitMultiplier: 1.25,
-			logRequest: ({ base64WireTransaction }) =>
-				console.debug('tx wire', base64WireTransaction),
-		},
-	},
-	{ commitment: 'confirmed' },
-);
+// Fetch an account once.
+const account = await client.actions.fetchAccount(address);
+console.log(account.lamports?.toString());
+
+// Watch lamports in real time.
+const watcher = client.watchers.watchBalance({ address }, (lamports) => {
+	console.log('balance:', lamports.toString());
+});
+
+// Later…
+watcher.abort();
 ```
 
-`prepareTransaction` simulates the transaction, inserts a compute-unit-limit instruction if you forgot one, refreshes the blockhash, and (optionally) reports the Base64 wire payload for observability.
+## Core pieces
 
-### Address lookup tables without version juggling
+- **Client store** – Zustand store that tracks cluster status, accounts, subscriptions, transactions,
+  and wallet state. Provide your own store if you need custom persistence.
+- **Actions** – Promise-based helpers (`fetchAccount`, `fetchBalance`, `sendTransaction`, `requestAirdrop`, `setCluster`, etc.) that wrap the RPC and keep the store in sync.
+- **Watchers** – Subscription helpers (`watchAccount`, `watchBalance`, `watchSignature`) that stream
+  updates into the store and call your listeners.
+- **Helpers** – Opinionated utilities for SOL transfers, SPL tokens, and transactions. They handle
+  mundane tasks like resolving fee payers, refreshing blockhashes, or signing with Wallet Standard
+  sessions.
 
-Need `v0` transactions? Pass any deserialized lookup tables via `addressLookupTables` and the helper automatically switches the transaction version to `0`. Leave it alone and you get legacy transactions—no need to think about versioning unless you explicitly want to override it:
+## Transaction helper
+
+`client.helpers.transaction` handles blockhashes, fee payers, and signing for you.
 
 ```ts
-await client.helpers.transaction.prepare({
-	addressLookupTables: [lookupTable],
-	instructions,
-	version: 'auto', // default; supplying lookup tables flips to v0 automatically
+const prepared = await client.helpers.transaction.prepare({
+	authority: walletSession,
+	instructions: [instruction],
 });
+
+const signature = await client.helpers.transaction.send(prepared);
+console.log(signature.toString());
 ```
 
-### Manual transaction prep + logging
+- `prepare` builds a transaction message and refreshes the blockhash.
+- `sign` / `toWire` let you collect signatures or emit Base64 manually.
+- `send` submits the prepared transaction (or uses `signAndSend` if the wallet supports it).
+- `prepareAndSend` runs everything plus an optional simulation/logging pass via `prepareTransaction`.
 
-Prefer to manage the signing or sending yourself? Call the utility directly via `client.prepareTransaction` or `client.helpers.prepareTransaction`:
+Need just the tuning step? Call `client.prepareTransaction` directly with your unsigned message.
 
-```ts
-const preparedMessage = await client.prepareTransaction({
-	computeUnitLimitMultiplier: 1.4,
-	logRequest: ({ base64WireTransaction }) => logger.info({ base64WireTransaction }),
-	transaction: unsignedMessage,
-});
+## Wallet helpers
 
-const wire = await client.helpers.transaction.toWire({
-	...somePreparedState,
-	message: preparedMessage,
-});
-```
-
-Because the helper never re-exports `@solana/kit`, you keep the ergonomic surface without giving up low-level control.
+Use `createWalletStandardConnector` to wrap Wallet Standard apps and register them with
+`createWalletRegistry`. The registry powers `client.actions.connectWallet` and the React hooks
+package, but you can also query it directly to build your own selectors.
 
 ## Scripts
 
-- `pnpm build` - runs both `compile:js` and `compile:typedefs`
-- `pnpm test:typecheck` - validates TypeScript types without emitting
-- `pnpm lint` / `pnpm format` - Biome-powered linting and formatting
-
-## Status
-
-This POC prioritizes API ergonomics and testable primitives. Expect rapid iteration and breaking changes.
+- `pnpm build` – run JS compilation and type definition emit
+- `pnpm test:typecheck` – strict type-checking without emit
+- `pnpm lint` / `pnpm format` – Biome-powered linting and formatting
