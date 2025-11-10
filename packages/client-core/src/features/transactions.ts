@@ -132,11 +132,28 @@ function hasSetComputeUnitPriceInstruction(instructions: readonly TransactionIns
 	);
 }
 
-function resolveVersion(requested?: TransactionVersion | 'auto'): TransactionVersion {
+function instructionUsesAddressLookup(instruction: TransactionInstruction): boolean {
+	if ('addressTableLookup' in instruction && instruction.addressTableLookup != null) {
+		return true;
+	}
+	if (
+		'addressTableLookups' in instruction &&
+		Array.isArray(instruction.addressTableLookups) &&
+		instruction.addressTableLookups.length > 0
+	) {
+		return true;
+	}
+	return false;
+}
+
+function resolveVersion(
+	requested: TransactionVersion | 'auto' | undefined,
+	instructions: readonly TransactionInstruction[],
+): TransactionVersion {
 	if (requested && requested !== 'auto') {
 		return requested;
 	}
-	return 'legacy';
+	return instructions.some(instructionUsesAddressLookup) ? 0 : 'legacy';
 }
 
 function normaliseCommitment(request: TransactionPrepareRequest, getFallbackCommitment: () => Commitment): Commitment {
@@ -225,9 +242,8 @@ export function createTransactionHelper(
 			}
 		}
 
-		const version = resolveVersion(request.version);
-
 		const baseInstructions = [...request.instructions];
+		const version = resolveVersion(request.version, baseInstructions);
 
 		const lifetime =
 			request.lifetime ??

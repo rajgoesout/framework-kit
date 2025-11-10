@@ -14,10 +14,10 @@ pnpm add @solana/client-core
 ## Quick start
 
 ```ts
-import { createClient } from '@solana/client-core';
+import { createClient } from "@solana/client-core";
 
 const client = createClient({
-	endpoint: 'https://api.devnet.solana.com',
+  endpoint: "https://api.devnet.solana.com",
 });
 
 // Fetch an account once.
@@ -26,7 +26,7 @@ console.log(account.lamports?.toString());
 
 // Watch lamports in real time.
 const watcher = client.watchers.watchBalance({ address }, (lamports) => {
-	console.log('balance:', lamports.toString());
+  console.log("balance:", lamports.toString());
 });
 
 // Later…
@@ -50,8 +50,8 @@ watcher.abort();
 
 ```ts
 const prepared = await client.helpers.transaction.prepare({
-	authority: walletSession,
-	instructions: [instruction],
+  authority: walletSession,
+  instructions: [instruction],
 });
 
 const signature = await client.helpers.transaction.send(prepared);
@@ -62,6 +62,7 @@ console.log(signature.toString());
 - `sign` / `toWire` let you collect signatures or emit Base64 manually.
 - `send` submits the prepared transaction (or uses `signAndSend` if the wallet supports it).
 - `prepareAndSend` runs everything plus an optional simulation/logging pass via `prepareTransaction`.
+- Versions default to `0` automatically when any instruction references address lookup tables, otherwise `legacy`; pass `version` if you need to override.
 
 Need just the tuning step? Call `client.prepareTransaction` directly with your unsigned message.
 

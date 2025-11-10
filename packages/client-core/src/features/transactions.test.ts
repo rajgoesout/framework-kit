@@ -165,3 +165,45 @@ describe('createTransactionHelper.prepareAndSend', () => {
 		);
 	});
 });
+
+describe('createTransactionHelper.prepare', () => {
+	const runtime = {
+		rpc: {
+			getLatestBlockhash: vi.fn(() => ({
+				send: vi.fn().mockResolvedValue({ value: { blockhash: 'abc', lastValidBlockHeight: 123n } }),
+			})),
+			sendTransaction: vi.fn(),
+		},
+		rpcSubscriptions: {} as never,
+	};
+	const getFallbackCommitment = () => 'confirmed' as Commitment;
+	const authority: TransactionSigner = { address: 'payer' } as TransactionSigner;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('defaults to legacy when instructions do not reference address tables', async () => {
+		const helper = createTransactionHelper(runtime as never, getFallbackCommitment);
+		await helper.prepare({
+			authority,
+			instructions: [{ programAddress: 'Demo1111111111111111111111111111111111', data: new Uint8Array([1]) }],
+		});
+		expect(createTransactionMessageMock).toHaveBeenCalledWith({ version: 'legacy' });
+	});
+
+	it('selects version 0 automatically when instructions reference address tables', async () => {
+		const helper = createTransactionHelper(runtime as never, getFallbackCommitment);
+		await helper.prepare({
+			authority,
+			instructions: [
+				{
+					programAddress: 'Demo1111111111111111111111111111111111',
+					data: new Uint8Array([1]),
+					addressTableLookups: [{}],
+				},
+			],
+		});
+		expect(createTransactionMessageMock).toHaveBeenCalledWith({ version: 0 });
+	});
+});
