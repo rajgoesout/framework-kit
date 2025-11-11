@@ -1,6 +1,11 @@
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+const workspaceRoot = fileURLToPath(new URL('.', import.meta.url));
+
 export default defineConfig({
+	root: workspaceRoot,
 	test: {
 		globals: true,
 		environment: 'node',
@@ -15,6 +20,12 @@ export default defineConfig({
 			reporter: ['text', 'lcov'],
 			reportsDirectory: './coverage',
 			include: ['packages/**/*.{ts,tsx}', 'examples/**/*.{ts,tsx}'],
+		},
+	},
+	resolve: {
+		alias: {
+			'@solana/client-core': resolve(workspaceRoot, 'packages/client-core/src/index.ts'),
+			'@solana/web3-compat': resolve(workspaceRoot, 'packages/web3-compat/src/index.ts'),
 		},
 	},
 });
