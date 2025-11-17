@@ -281,24 +281,57 @@ function WaitForSignature({ signature }) {
 
 Wrap a subtree with `<SolanaQueryProvider>` and call hooks like `useLatestBlockhash`,
 `useProgramAccounts`, `useSignatureStatus`, or `useSimulateTransaction`. Every hook returns
-`{ data, status, refresh }` so you can read the current value and trigger a refetch:
+`{ data, status, refresh }` so you can read the current value and trigger a refetch. Want to lean on React
+Suspense later? Pass `suspense` to `SolanaQueryProvider` and wrap just the section that should pause in a
+local `<Suspense>` boundary—no hook changes required:
+
+```tsx
+import { SolanaQueryProvider, useBalance } from '@solana/react-hooks';
+import { Suspense } from 'react';
+
+function BalanceDetails({ address }: { address: string }) {
+    const balance = useBalance(address);
+    return <p>Lamports: {balance.lamports?.toString() ?? '0'}</p>;
+}
+
+export function WalletPanel({ address }: { address: string }) {
+    return (
+        <SolanaQueryProvider suspense>
+            {/* Only this block suspends while balance loads */}
+            <Suspense fallback={<p>Loading balance…</p>}>
+                <BalanceDetails address={address} />
+            </Suspense>
+        </SolanaQueryProvider>
+    );
+}
+```
 
 ### Latest blockhash
 
 Poll or refetch the cluster's latest blockhash.
 
 ```tsx
-import { useLatestBlockhash } from '@solana/react-hooks';
+import { SolanaQueryProvider, useLatestBlockhash } from '@solana/react-hooks';
 
 function BlockhashTicker() {
-    const { blockhash, status, refresh } = useLatestBlockhash({ refreshInterval: 20_000 });
+    const latest = useLatestBlockhash({ refreshInterval: 20_000 });
+    if (latest.status === 'loading') return <p>Fetching blockhash…</p>;
+    if (latest.status === 'error') return <p role="alert">Failed to fetch blockhash.</p>;
 
     return (
         <div>
-            <button onClick={() => refresh()}>Refresh</button>
-            <p>Status: {status}</p>
-            <p>Blockhash: {blockhash ?? 'loading…'}</p>
+            <button onClick={() => latest.refresh()}>Refresh</button>
+            <p>Status: {latest.status}</p>
+            <p>Blockhash: {latest.blockhash ?? 'unknown'}</p>
         </div>
+    );
+}
+
+export function BlockhashCard() {
+    return (
+        <SolanaQueryProvider>
+            <BlockhashTicker />
+        </SolanaQueryProvider>
     );
 }
 ```
@@ -306,19 +339,19 @@ function BlockhashTicker() {
 ### Program accounts
 
 ```tsx
-import { SolanaQueryProvider, useProgramAccounts } from '@solana/react-hooks';
+import { SolanaClientProvider, SolanaQueryProvider, useProgramAccounts } from '@solana/react-hooks';
 
 function ProgramAccountsList({ programAddress }) {
-    const { data, status, refresh } = useProgramAccounts(programAddress);
-
-    if (status === 'loading') return <p>Loading…</p>;
-    if (status === 'error') return <p>Retry later.</p>;
+    const query = useProgramAccounts(programAddress);
+    if (query.status === 'loading') return <p>Loading accounts…</p>;
+    if (query.status === 'error') return <p role="alert">Retry later.</p>;
 
     return (
         <div>
-            <button onClick={() => refresh()}>Refresh</button>
+            <button onClick={() => query.refresh()}>Refresh</button>
+            <p>Status: {query.status}</p>
             <ul>
-                {data?.map(({ pubkey }) => (
+                {query.accounts?.map(({ pubkey }) => (
                     <li key={pubkey.toString()}>{pubkey.toString()}</li>
                 ))}
             </ul>
@@ -345,15 +378,14 @@ Simulate any transaction payload (wire string or object) and read RPC logs.
 import { useSimulateTransaction } from '@solana/react-hooks';
 
 function SimulationLogs({ transaction }) {
-    const { logs, status, refresh } = useSimulateTransaction(transaction);
-
-    if (status === 'loading') return <p>Simulating…</p>;
-    if (status === 'error') return <p>Simulation failed.</p>;
-
+    const query = useSimulateTransaction(transaction);
+    if (query.status === 'loading') return <p>Simulating…</p>;
+    if (query.status === 'error') return <p role="alert">Simulation failed.</p>;
     return (
         <div>
-            <button onClick={() => refresh()}>Re-run</button>
-            <pre>{JSON.stringify(logs ?? [], null, 2)}</pre>
+            <button onClick={() => query.refresh()}>Re-run</button>
+            <p>Status: {query.status}</p>
+            <pre>{JSON.stringify(query.logs, null, 2)}</pre>
         </div>
     );
 }

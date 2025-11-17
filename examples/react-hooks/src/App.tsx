@@ -55,7 +55,7 @@ export default function App() {
 
 	return (
 		<SolanaClientProvider config={clientConfig}>
-			<SolanaQueryProvider>
+			<SolanaQueryProvider suspense>
 				<DemoApp connectors={walletConnectors} />
 			</SolanaQueryProvider>
 		</SolanaClientProvider>

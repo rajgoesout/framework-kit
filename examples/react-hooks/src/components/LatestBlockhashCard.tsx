@@ -1,9 +1,18 @@
 import { useLatestBlockhash } from '@solana/react-hooks';
+import { Suspense } from 'react';
 
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 export function LatestBlockhashCard() {
+	return (
+		<Suspense fallback={<LatestBlockhashFallback />}>
+			<LatestBlockhashCardContent />
+		</Suspense>
+	);
+}
+
+function LatestBlockhashCardContent() {
 	const latest = useLatestBlockhash({ refreshInterval: 30_000 });
 
 	return (
@@ -19,15 +28,14 @@ export function LatestBlockhashCard() {
 			</CardHeader>
 			<CardContent className="space-y-3 text-sm text-muted-foreground">
 				<div>
-					<span className="font-medium text-foreground">Blockhash:</span>{' '}
-					<code>{latest.blockhash ?? 'Loading…'}</code>
+					<span className="font-medium text-foreground">Blockhash:</span> <code>{latest.blockhash}</code>
 				</div>
 				<div>
 					<span className="font-medium text-foreground">Last Valid Height:</span>{' '}
-					{latest.lastValidBlockHeight ?? 'Unknown'}
+					{latest.lastValidBlockHeight.toString()}
 				</div>
 				<div>
-					<span className="font-medium text-foreground">Context Slot:</span> {latest.contextSlot ?? 'Unknown'}
+					<span className="font-medium text-foreground">Context Slot:</span> {latest.contextSlot.toString()}
 				</div>
 				<p aria-live="polite">
 					Status:{' '}
@@ -38,6 +46,27 @@ export function LatestBlockhashCard() {
 			</CardContent>
 			<CardFooter>
 				<Button onClick={() => latest.refresh()} type="button" variant="secondary">
+					Refresh now
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+}
+
+function LatestBlockhashFallback() {
+	return (
+		<Card aria-busy="true">
+			<CardHeader>
+				<div className="space-y-1.5">
+					<CardTitle>Latest Blockhash</CardTitle>
+					<CardDescription>Fetching latest blockhash…</CardDescription>
+				</div>
+			</CardHeader>
+			<CardContent className="text-sm text-muted-foreground">
+				<p aria-live="polite">Loading current cluster context…</p>
+			</CardContent>
+			<CardFooter>
+				<Button disabled type="button" variant="secondary">
 					Refresh now
 				</Button>
 			</CardFooter>
