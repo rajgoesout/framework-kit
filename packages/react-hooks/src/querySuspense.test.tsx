@@ -73,17 +73,16 @@ describe('useSolanaRpcQuery suspense configuration', () => {
 			</SolanaClientProvider>,
 		);
 
-		expect(useSWRMock).toHaveBeenCalledWith(null, expect.any(Function), expect.objectContaining({ suspense: false }));
+		expect(useSWRMock).toHaveBeenCalledWith(
+			null,
+			expect.any(Function),
+			expect.objectContaining({ suspense: false }),
+		);
 	});
 });
 
 function TestQuery({ disabled = false }: { disabled?: boolean }) {
-	useSolanaRpcQuery(
-		'test-suspense',
-		[],
-		(_client: SolanaClient) => Promise.resolve('ok'),
-		{ disabled },
-	);
+	useSolanaRpcQuery('test-suspense', [], (_client: SolanaClient) => Promise.resolve('ok'), { disabled });
 	return null;
 }
 

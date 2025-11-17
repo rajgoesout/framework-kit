@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR, { type BareFetcher, type SWRConfiguration, type SWRResponse } from 'swr';
 
 import { useSolanaClient } from './context';
-import { useClientStore } from './useClientStore';
 import { useQuerySuspensePreference } from './querySuspenseContext';
+import { useClientStore } from './useClientStore';
 
 const QUERY_NAMESPACE = '@solana/react-hooks';
 
