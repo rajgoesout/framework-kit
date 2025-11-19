@@ -1,5 +1,11 @@
 # @solana/client
 
+## 0.1.1
+
+### Patch Changes
+
+- [#10](https://github.com/solana-foundation/framework-kit/pull/10) [`5efbada`](https://github.com/solana-foundation/framework-kit/commit/5efbada1dada1340632f14b87f3f0e958bc263fa) Thanks [@GuiBibeau](https://github.com/GuiBibeau)! - Stop logging cluster connection details when the client marks a cluster as ready.
+
 ## 0.1.0
 
 ### Minor Changes
