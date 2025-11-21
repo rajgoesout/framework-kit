@@ -1,0 +1,24 @@
+# @solana/test-types-smoke
+
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`5efbada`](https://github.com/solana-foundation/framework-kit/commit/5efbada1dada1340632f14b87f3f0e958bc263fa)]:
+  - @solana/client@0.1.1
+  - @solana/react-hooks@0.2.1
+
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`7ff0fa5`](https://github.com/solana-foundation/framework-kit/commit/7ff0fa57e2026ca8f5cdaf5e612327e1c6c30ed2)]:
+  - @solana/react-hooks@0.2.0
+
+## 0.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`e63f7b6`](https://github.com/solana-foundation/framework-kit/commit/e63f7b600d065c14b52c6690b7ed4ada0c0ba0b5)]:
+  - @solana/react-hooks@0.1.0
+  - @solana/client@0.1.0

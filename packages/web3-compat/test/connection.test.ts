@@ -8,11 +8,11 @@ import {
 } from '@solana/web3.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@solana/client-core', () => ({
+vi.mock('@solana/client', () => ({
 	createSolanaRpcClient: vi.fn(),
 }));
 
-import { createSolanaRpcClient } from '@solana/client-core';
+import { createSolanaRpcClient } from '@solana/client';
 import { Connection } from '../src';
 
 const MOCK_ENDPOINT = 'http://localhost:8899';

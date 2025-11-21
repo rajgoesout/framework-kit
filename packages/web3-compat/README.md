@@ -16,7 +16,7 @@ pnpm add @solana/web3-compat
 ```
 
 Your project must also have valid Kit peer dependencies (`@solana/kit`,
-`@solana/client-core`, etc.).
+`@solana/client`, etc.).
 
 ## Usage
 
@@ -54,7 +54,7 @@ transaction.feePayer = payer.publicKey;
 await sendAndConfirmTransaction(connection, transaction, [payer]);
 ```
 
-Under the hood every RPC call goes through Kit via `@solana/client-core`, but currently
+Under the hood every RPC call goes through Kit via `@solana/client`, but currently
 the surface area, return types, and error semantics stay aligned with
 `@solana/web3.js`.
 

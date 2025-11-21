@@ -1,15 +1,19 @@
-import type { SolanaClient } from '@solana/client-core';
+import type { SolanaClient } from '@solana/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR, { type BareFetcher, type SWRConfiguration, type SWRResponse } from 'swr';
 
 import { useSolanaClient } from './context';
+import { useQuerySuspensePreference } from './querySuspenseContext';
 import { useClientStore } from './useClientStore';
 
 const QUERY_NAMESPACE = '@solana/react-hooks';
 
 export type QueryStatus = 'error' | 'idle' | 'loading' | 'success';
 
-export type UseSolanaRpcQueryOptions<Data> = Omit<SWRConfiguration<Data, unknown, BareFetcher<Data>>, 'fallback'> &
+export type UseSolanaRpcQueryOptions<Data> = Omit<
+	SWRConfiguration<Data, unknown, BareFetcher<Data>>,
+	'fallback' | 'suspense'
+> &
 	Readonly<{
 		disabled?: boolean;
 	}>;
@@ -35,9 +39,13 @@ export function useSolanaRpcQuery<Data>(
 ): SolanaQueryResult<Data> {
 	const client = useSolanaClient();
 	const cluster = useClientStore((state) => state.cluster);
-	const disabled = options.disabled ?? false;
-	const swrOptions: SWRConfiguration<Data, unknown, BareFetcher<Data>> = { ...options };
-	delete (swrOptions as { disabled?: boolean }).disabled;
+	const { disabled = false, ...restOptions } = options;
+	const providerSuspensePreference = useQuerySuspensePreference();
+	const suspenseEnabled = !disabled && Boolean(providerSuspensePreference);
+	const swrOptions: SWRConfiguration<Data, unknown, BareFetcher<Data>> = {
+		...restOptions,
+		suspense: suspenseEnabled,
+	};
 
 	const key = useMemo(() => {
 		if (disabled) {

@@ -1,5 +1,4 @@
-import type { WalletConnector } from '@solana/client-core';
-import { useConnectWallet, useDisconnectWallet, useWallet, useWalletSession } from '@solana/react-hooks';
+import { useWalletConnection } from '@solana/react-hooks';
 import { useCallback } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -14,48 +13,39 @@ function formatError(error: unknown): string {
 	return JSON.stringify(error);
 }
 
-type Props = Readonly<{
-	connectors: readonly WalletConnector[];
-}>;
-
-export function WalletControls({ connectors }: Props) {
-	const wallet = useWallet();
-	const session = useWalletSession();
-	const connectWallet = useConnectWallet();
-	const disconnectWallet = useDisconnectWallet();
+export function WalletControls() {
+	const { connect, connectors, connectorId, connected, connecting, disconnect, error, status, wallet } =
+		useWalletConnection();
 
 	const handleConnect = useCallback(
 		async (connectorId: string) => {
 			try {
-				await connectWallet(connectorId);
+				await connect(connectorId);
 			} catch {
 				// Store will expose the error state; nothing else to do here.
 			}
 		},
-		[connectWallet],
+		[connect],
 	);
 
 	const handleDisconnect = useCallback(async () => {
 		try {
-			await disconnectWallet();
+			await disconnect();
 		} catch {
 			// Store already captures the error in wallet state.
 		}
-	}, [disconnectWallet]);
-
-	const activeConnectorId =
-		wallet.status === 'connected' || wallet.status === 'connecting' ? wallet.connectorId : undefined;
+	}, [disconnect]);
 
 	let statusLabel = 'No wallet connected.';
-	if (wallet.status === 'connected') {
-		statusLabel = `Connected to ${wallet.connectorId}: ${wallet.session.account.address.toString()}`;
-	} else if (wallet.status === 'connecting') {
-		statusLabel = `Connecting to ${wallet.connectorId}…`;
-	} else if (wallet.status === 'error') {
-		statusLabel = `Error connecting to ${wallet.connectorId ?? 'wallet'}.`;
+	if (status === 'connected' && wallet) {
+		statusLabel = `Connected to ${connectorId}: ${wallet.account.address.toString()}`;
+	} else if (status === 'connecting') {
+		statusLabel = `Connecting to ${connectorId ?? 'wallet'}…`;
+	} else if (status === 'error') {
+		statusLabel = `Error connecting to ${connectorId ?? 'wallet'}.`;
 	}
 
-	const error = wallet.status === 'error' && wallet.error ? formatError(wallet.error) : null;
+	const formattedError = status === 'error' && error ? formatError(error) : null;
 
 	return (
 		<Card>
@@ -76,8 +66,8 @@ export function WalletControls({ connectors }: Props) {
 						</span>
 					) : null}
 					{connectors.map((connector) => {
-						const isActive = wallet.status === 'connected' && connector.id === activeConnectorId;
-						const isBusy = wallet.status === 'connecting' && connector.id === activeConnectorId;
+						const isActive = connected && connector.id === connectorId;
+						const isBusy = connecting && connector.id === connectorId;
 						return (
 							<Button
 								key={connector.id}
@@ -93,14 +83,9 @@ export function WalletControls({ connectors }: Props) {
 						);
 					})}
 				</div>
-				{session ? (
+				{wallet ? (
 					<div className="flex flex-wrap gap-2">
-						<Button
-							disabled={wallet.status === 'connecting'}
-							onClick={handleDisconnect}
-							type="button"
-							variant="ghost"
-						>
+						<Button disabled={connecting} onClick={handleDisconnect} type="button" variant="ghost">
 							Disconnect
 						</Button>
 					</div>
@@ -108,9 +93,9 @@ export function WalletControls({ connectors }: Props) {
 			</CardContent>
 			<CardFooter className="flex flex-col gap-3 text-sm">
 				<p className="text-muted-foreground">{statusLabel}</p>
-				{error ? (
+				{formattedError ? (
 					<span aria-live="polite" className="status-badge" data-state="error">
-						{error}
+						{formattedError}
 					</span>
 				) : null}
 			</CardFooter>

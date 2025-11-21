@@ -1,4 +1,4 @@
-import type { SolanaClient } from '@solana/client-core';
+import { type AddressLike, type SolanaClient, stableStringify, toAddress, toAddressString } from '@solana/client';
 import {
 	type Base64EncodedWireTransaction,
 	type Commitment,
@@ -10,7 +10,6 @@ import { useCallback, useMemo } from 'react';
 
 import type { SolanaQueryResult, UseSolanaRpcQueryOptions } from './query';
 import { useSolanaRpcQuery } from './query';
-import { type AddressLike, toAddress, toAddressString } from './utils/address';
 
 type RpcInstance = SolanaClient['runtime']['rpc'];
 
@@ -27,21 +26,6 @@ type SimulateTransactionResponse = Awaited<ReturnType<SimulateTransactionPlan['s
 
 const DEFAULT_BLOCKHASH_REFRESH_INTERVAL = 30_000;
 
-type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
-
-function stableStringify(value: unknown): string {
-	const result = JSON.stringify(value, (_key, candidate) => {
-		if (typeof candidate === 'bigint') {
-			return { __type: 'bigint', value: candidate.toString() };
-		}
-		if (candidate instanceof Uint8Array) {
-			return Array.from(candidate);
-		}
-		return candidate as JsonValue;
-	});
-	return result ?? 'undefined';
-}
-
 export type UseLatestBlockhashOptions = Omit<UseSolanaRpcQueryOptions<LatestBlockhashResponse>, 'refreshInterval'> &
 	Readonly<{
 		commitment?: Commitment;
@@ -56,8 +40,8 @@ export type LatestBlockhashQueryResult = SolanaQueryResult<LatestBlockhashRespon
 		lastValidBlockHeight: bigint | null;
 	}>;
 
-export function useLatestBlockhash(options: UseLatestBlockhashOptions = {}): LatestBlockhashQueryResult {
-	const { commitment, minContextSlot, refreshInterval = DEFAULT_BLOCKHASH_REFRESH_INTERVAL, ...rest } = options;
+export function useLatestBlockhash(options?: UseLatestBlockhashOptions): LatestBlockhashQueryResult {
+	const { commitment, minContextSlot, refreshInterval = DEFAULT_BLOCKHASH_REFRESH_INTERVAL, ...rest } = options ?? {};
 	const normalizedMinContextSlot = useMemo<bigint | undefined>(() => {
 		if (minContextSlot === undefined) {
 			return undefined;
@@ -104,9 +88,10 @@ export type ProgramAccountsQueryResult = SolanaQueryResult<ProgramAccountsRespon
 
 export function useProgramAccounts(
 	programAddress?: AddressLike,
-	options: UseProgramAccountsOptions = {},
+	options?: UseProgramAccountsOptions,
 ): ProgramAccountsQueryResult {
-	const { commitment, config, ...queryOptions } = options;
+	const { commitment, config, ...queryOptions } = options ?? {};
+	const { disabled: disabledOption, ...restQueryOptions } = queryOptions;
 	const address = useMemo(() => (programAddress ? toAddress(programAddress) : undefined), [programAddress]);
 	const addressKey = useMemo(() => (address ? toAddressString(address) : null), [address]);
 	const configKey = useMemo(() => stableStringify(config ?? null), [config]);
@@ -115,18 +100,20 @@ export function useProgramAccounts(
 			if (!address) {
 				throw new Error('Provide a program address before querying program accounts.');
 			}
-			const fallbackCommitment = commitment ?? config?.commitment;
-			const plan = client.runtime.rpc.getProgramAccounts(address, {
-				...config,
-				commitment: fallbackCommitment ?? client.store.getState().cluster.commitment,
-			});
+			const fallbackCommitment = commitment ?? config?.commitment ?? client.store.getState().cluster.commitment;
+			const mergedConfig = {
+				...(config ?? {}),
+				commitment: fallbackCommitment,
+			} satisfies ProgramAccountsConfig;
+			const plan = client.runtime.rpc.getProgramAccounts(address, mergedConfig);
 			return plan.send({ abortSignal: AbortSignal.timeout(20_000) });
 		},
 		[address, commitment, config],
 	);
+	const disabled = disabledOption ?? !address;
 	const query = useSolanaRpcQuery<ProgramAccountsResponse>('programAccounts', [addressKey, configKey], fetcher, {
-		...queryOptions,
-		disabled: queryOptions.disabled ?? !address,
+		...restQueryOptions,
+		disabled,
 	});
 	return {
 		...query,
@@ -146,16 +133,17 @@ export type UseSimulateTransactionOptions = Omit<
 
 export type SimulateTransactionQueryResult = SolanaQueryResult<SimulateTransactionResponse> &
 	Readonly<{
-		logs: readonly string[] | null | undefined;
+		logs: readonly string[];
 	}>;
 
 type SimulationInput = (SendableTransaction & Transaction) | Base64EncodedWireTransaction | string;
 
 export function useSimulateTransaction(
 	transaction?: SimulationInput | null,
-	options: UseSimulateTransactionOptions = {},
+	options?: UseSimulateTransactionOptions,
 ): SimulateTransactionQueryResult {
-	const { commitment, config, refreshInterval, ...rest } = options;
+	const { commitment, config, refreshInterval, ...rest } = options ?? {};
+	const { disabled: disabledOption, revalidateIfStale, revalidateOnFocus, ...queryOptions } = rest;
 	const wire = useMemo<Base64EncodedWireTransaction | null>(() => {
 		if (!transaction) {
 			return null;
@@ -171,23 +159,25 @@ export function useSimulateTransaction(
 			if (!wire) {
 				throw new Error('Provide a transaction payload before simulating.');
 			}
-			const plan = client.runtime.rpc.simulateTransaction(wire, {
-				...config,
+			const resolvedConfig = {
+				...(config ?? {}),
 				commitment: commitment ?? config?.commitment ?? client.store.getState().cluster.commitment,
-			} as SimulateTransactionConfig);
+			} as SimulateTransactionConfig;
+			const plan = client.runtime.rpc.simulateTransaction(wire, resolvedConfig);
 			return plan.send({ abortSignal: AbortSignal.timeout(20_000) });
 		},
 		[commitment, config, wire],
 	);
+	const disabled = disabledOption ?? !wire;
 	const query = useSolanaRpcQuery<SimulateTransactionResponse>('simulateTransaction', [wire, configKey], fetcher, {
-		...rest,
+		...queryOptions,
 		refreshInterval,
-		disabled: rest.disabled ?? !wire,
-		revalidateIfStale: rest.revalidateIfStale ?? false,
-		revalidateOnFocus: rest.revalidateOnFocus ?? false,
+		disabled,
+		revalidateIfStale: revalidateIfStale ?? false,
+		revalidateOnFocus: revalidateOnFocus ?? false,
 	});
 	return {
 		...query,
-		logs: query.data?.value.logs,
+		logs: query.data?.value.logs ?? [],
 	};
 }

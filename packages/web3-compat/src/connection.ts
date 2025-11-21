@@ -1,5 +1,5 @@
 import type { Address } from '@solana/addresses';
-import { createSolanaRpcClient, type SolanaRpcClient } from '@solana/client-core';
+import { createSolanaRpcClient, type SolanaRpcClient } from '@solana/client';
 import type { Commitment as KitCommitment, Signature } from '@solana/kit';
 import type { Base64EncodedWireTransaction } from '@solana/transactions';
 import {

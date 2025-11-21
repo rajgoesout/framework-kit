@@ -24,7 +24,7 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			'@solana/client-core': resolve(workspaceRoot, 'packages/client-core/src/index.ts'),
+			'@solana/client': resolve(workspaceRoot, 'packages/client/src/index.ts'),
 			'@solana/web3-compat': resolve(workspaceRoot, 'packages/web3-compat/src/index.ts'),
 		},
 	},

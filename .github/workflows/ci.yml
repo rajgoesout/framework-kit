@@ -57,3 +57,6 @@ jobs:
 
       - name: Build workspace
         run: pnpm build
+
+      - name: Run type smoke tests
+        run: pnpm --filter @solana/test-types-smoke test

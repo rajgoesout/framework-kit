@@ -1,3 +1,5 @@
+'use client';
+
 export { SolanaClientProvider, useSolanaClient } from './context';
 export {
 	useAccount,
@@ -6,9 +8,12 @@ export {
 	useClusterStatus,
 	useConnectWallet,
 	useDisconnectWallet,
+	useSendTransaction,
+	useSignatureStatus,
 	useSolTransfer,
 	useSplToken,
 	useTransactionPool,
+	useWaitForSignature,
 	useWallet,
 	useWalletActions,
 	useWalletSession,
@@ -16,6 +21,8 @@ export {
 } from './hooks';
 export { SolanaQueryProvider } from './QueryProvider';
 export { useLatestBlockhash, useProgramAccounts, useSimulateTransaction } from './queryHooks';
+export { SolanaProvider } from './SolanaProvider';
+export { useWalletConnection, useWalletModalState, WalletConnectionManager } from './ui';
 export { useClientStore } from './useClientStore';
 export type { OnlySolanaChains } from './walletStandardHooks';
 export {
