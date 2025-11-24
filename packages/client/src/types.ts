@@ -28,6 +28,7 @@ export type WalletConnectorMetadata = Readonly<{
 	icon?: string;
 	id: string;
 	name: string;
+	ready?: boolean;
 }>;
 
 export type WalletAccount = Readonly<{
@@ -164,6 +165,16 @@ export type SolanaClientConfig = Readonly<{
 	logger?: ClientLogger;
 	rpcClient?: SolanaRpcClient;
 	walletConnectors?: readonly WalletConnector[];
+	websocketEndpoint?: ClusterUrl;
+}>;
+
+export type SerializableSolanaState = Readonly<{
+	autoconnect?: boolean;
+	commitment?: Commitment;
+	endpoint: ClusterUrl;
+	lastConnectorId?: string | null;
+	lastPublicKey?: string | null;
+	version: number;
 	websocketEndpoint?: ClusterUrl;
 }>;
 

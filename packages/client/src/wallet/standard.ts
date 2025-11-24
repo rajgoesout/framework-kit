@@ -126,6 +126,7 @@ export function createWalletStandardConnector(
 		icon: options.icon ?? wallet.icon,
 		id: options.id ?? deriveConnectorId(wallet),
 		name: options.name ?? wallet.name,
+		ready: typeof window !== 'undefined',
 	};
 
 	/**
