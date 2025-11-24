@@ -5,6 +5,9 @@ code run on top of Kit primitives.
 
 This package is designed to help migrate from web3.js to Kit.
 
+> Status: this package is currently kept private inside the monorepo while we
+> finish parity testing. It is not published to npm yet.
+
 The goal of this release is **zero breaking changes** for applications that only
 touch the subset of web3.js APIs listed below. There will be future releases that slowly
 implement breaking changes as they move over to Kit primitives and intuitions.

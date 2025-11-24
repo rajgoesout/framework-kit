@@ -1,6 +1,7 @@
 {
 	"name": "@solana/web3-compat",
 	"version": "0.0.1",
+	"private": true,
 	"description": "Compatibility layer that preserves the web3.js API while delegating to Kit primitives under the hood",
 	"exports": {
 		"edge-light": {
