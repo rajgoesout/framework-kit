@@ -1,5 +1,14 @@
 # @solana/react-hooks
 
+## 0.2.2
+
+### Patch Changes
+
+- [#17](https://github.com/solana-foundation/framework-kit/pull/17) [`f71f75b`](https://github.com/solana-foundation/framework-kit/commit/f71f75be306aa86dbab3d1a1c76a00cadb4f08a0) Thanks [@GuiBibeau](https://github.com/GuiBibeau)! - Add opt-in Suspense support for account, balance, and SPL token hooks via the shared query suspense preference.
+
+- Updated dependencies [[`5fef840`](https://github.com/solana-foundation/framework-kit/commit/5fef8403efb0c41d386bae7eaa2a504707dae7ca)]:
+  - @solana/client@0.1.2
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @solana/client
 
+## 0.1.2
+
+### Patch Changes
+
+- [`5fef840`](https://github.com/solana-foundation/framework-kit/commit/5fef8403efb0c41d386bae7eaa2a504707dae7ca) Thanks [@GuiBibeau](https://github.com/GuiBibeau)! - Add SerializableSolanaState helpers for hydration/persistence and include an optional ready flag on WalletConnector metadata (set for Wallet Standard connectors).
+
 ## 0.1.1
 
 ### Patch Changes
