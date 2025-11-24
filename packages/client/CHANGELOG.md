@@ -1,5 +1,11 @@
 # @solana/client
 
+## 0.1.3
+
+### Patch Changes
+
+- [#32](https://github.com/solana-foundation/framework-kit/pull/32) [`0a4f856`](https://github.com/solana-foundation/framework-kit/commit/0a4f8564aadb0fa6f090eeb96b284b8634397d89) Thanks [@GuiBibeau](https://github.com/GuiBibeau)! - Harden Wallet Standard connectors: add a `kind` field, stable `wallet-standard:<name>` ids, optional `ready` metadata, and tests for metadata/deduplication.
+
 ## 0.1.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
 	"name": "@solana/react-hooks",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description": "React hooks for the @solana/client Solana client",
 	"exports": {
 		"edge-light": {
