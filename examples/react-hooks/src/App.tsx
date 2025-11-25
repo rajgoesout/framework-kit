@@ -1,11 +1,4 @@
-import {
-	autoDiscover,
-	backpack,
-	createSolanaRpcClient,
-	phantom,
-	type SolanaClientConfig,
-	solflare,
-} from '@solana/client';
+import { autoDiscover, backpack, phantom, type SolanaClientConfig, solflare } from '@solana/client';
 import { SolanaProvider } from '@solana/react-hooks';
 import { Suspense } from 'react';
 
@@ -27,23 +20,15 @@ import { WalletControls } from './components/WalletControls.tsx';
 
 const LAST_CONNECTOR_STORAGE_KEY = 'solana:last-connector';
 
+const WALLET_CONNECTORS = [...phantom(), ...solflare(), ...backpack(), ...autoDiscover()];
 const DEFAULT_CLIENT_CONFIG: SolanaClientConfig = {
 	commitment: 'confirmed',
 	endpoint: 'https://api.devnet.solana.com',
-	websocketEndpoint: 'wss://api.devnet.solana.com',
 };
-
-const WALLET_CONNECTORS = [...phantom(), ...solflare(), ...backpack(), ...autoDiscover()];
-const RPC_CLIENT = createSolanaRpcClient({
-	commitment: DEFAULT_CLIENT_CONFIG.commitment,
-	endpoint: DEFAULT_CLIENT_CONFIG.endpoint,
-	websocketEndpoint: DEFAULT_CLIENT_CONFIG.websocketEndpoint,
-});
 
 export default function App() {
 	const clientConfig: SolanaClientConfig = {
 		...DEFAULT_CLIENT_CONFIG,
-		rpcClient: RPC_CLIENT,
 		walletConnectors: WALLET_CONNECTORS,
 	};
 
