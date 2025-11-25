@@ -11,7 +11,6 @@ import {
 	createSplTransferController,
 	createTransactionPoolController,
 	deriveConfirmationStatus,
-	getWalletStandardConnectors,
 	type LatestBlockhashCache,
 	normalizeSignature,
 	SIGNATURE_STATUS_TIMEOUT_MS,
@@ -37,10 +36,8 @@ import {
 	type TransactionPrepared,
 	type TransactionSendOptions,
 	toAddress,
-	type WalletConnector,
 	type WalletSession,
 	type WalletStatus,
-	watchWalletStandardConnectors,
 } from '@solana/client';
 import type { Commitment, Lamports, Signature } from '@solana/kit';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
@@ -54,13 +51,6 @@ import { useClientStore } from './useClientStore';
 
 type ClusterState = ClientState['cluster'];
 type ClusterStatus = ClientState['cluster']['status'];
-export type WalletStandardDiscoveryOptions = Parameters<typeof watchWalletStandardConnectors>[1];
-
-type WalletStandardDiscoveryConfig = WalletStandardDiscoveryOptions &
-	Readonly<{
-		disabled?: boolean;
-	}>;
-
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 type RpcInstance = SolanaClient['runtime']['rpc'];
@@ -528,29 +518,6 @@ export function useBalance(
 		}),
 		[account, error, fetching, lamports, slot],
 	);
-}
-
-/**
- * Collect Wallet Standard connectors and keep the list in sync with registration changes.
- */
-export function useWalletStandardConnectors(options?: WalletStandardDiscoveryConfig): readonly WalletConnector[] {
-	const overrides = options?.overrides;
-	const disabled = options?.disabled ?? false;
-	const memoisedOptions = useMemo(() => (overrides ? { overrides } : undefined), [overrides]);
-	const [connectors, setConnectors] = useState<readonly WalletConnector[]>(() =>
-		disabled ? [] : getWalletStandardConnectors(memoisedOptions ?? {}),
-	);
-
-	useEffect(() => {
-		if (disabled) return;
-		setConnectors(getWalletStandardConnectors(memoisedOptions ?? {}));
-		const unwatch = watchWalletStandardConnectors(setConnectors, memoisedOptions ?? {});
-		return () => {
-			unwatch();
-		};
-	}, [disabled, memoisedOptions]);
-
-	return connectors;
 }
 
 type UseTransactionPoolConfig = Readonly<{

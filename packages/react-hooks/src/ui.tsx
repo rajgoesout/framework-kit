@@ -3,19 +3,14 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useSolanaClient } from './context';
-import {
-	useConnectWallet,
-	useDisconnectWallet,
-	useWallet,
-	useWalletStandardConnectors,
-	type WalletStandardDiscoveryOptions,
-} from './hooks';
+import { useConnectWallet, useDisconnectWallet, useWallet } from './hooks';
 
 type WalletConnectionState = Readonly<{
 	connect(connectorId: string, options?: Readonly<{ autoConnect?: boolean }>): Promise<void>;
 	connected: boolean;
 	connecting: boolean;
 	connectors: readonly WalletConnector[];
+	currentConnector?: WalletConnector;
 	connectorId?: string;
 	disconnect(): Promise<void>;
 	error: unknown;
@@ -23,14 +18,8 @@ type WalletConnectionState = Readonly<{
 	wallet: WalletSession | undefined;
 }>;
 
-type WalletDiscoveryOptions = WalletStandardDiscoveryOptions &
-	Readonly<{
-		disabled?: boolean;
-	}>;
-
 type UseWalletConnectionOptions = Readonly<{
 	connectors?: readonly WalletConnector[];
-	discoveryOptions?: WalletDiscoveryOptions;
 }>;
 
 /**
@@ -41,13 +30,7 @@ export function useWalletConnection(options: UseWalletConnectionOptions = {}): W
 	const connectWallet = useConnectWallet();
 	const disconnectWallet = useDisconnectWallet();
 	const client = useSolanaClient();
-	const shouldDiscover = !options.connectors && client.connectors.all.length === 0;
-	const discovered = useWalletStandardConnectors({
-		...options.discoveryOptions,
-		disabled: !shouldDiscover,
-	});
-
-	const connectors = options.connectors ?? (client.connectors.all.length > 0 ? client.connectors.all : discovered);
+	const connectors = options.connectors ?? client.connectors.all;
 	const connect = useCallback(
 		(connectorId: string, connectOptions?: Readonly<{ autoConnect?: boolean }>) =>
 			connectWallet(connectorId, connectOptions),
@@ -57,6 +40,7 @@ export function useWalletConnection(options: UseWalletConnectionOptions = {}): W
 
 	const state = useMemo<WalletConnectionState>(() => {
 		const connectorId = 'connectorId' in wallet ? wallet.connectorId : undefined;
+		const currentConnector = connectorId ? connectors.find((connector) => connector.id === connectorId) : undefined;
 		const session: WalletSession | undefined = wallet.status === 'connected' ? wallet.session : undefined;
 		const error = wallet.status === 'error' ? (wallet.error ?? null) : null;
 
@@ -66,6 +50,7 @@ export function useWalletConnection(options: UseWalletConnectionOptions = {}): W
 			connecting: wallet.status === 'connecting',
 			connectors,
 			connectorId,
+			currentConnector,
 			disconnect,
 			error,
 			status: wallet.status,
@@ -79,14 +64,13 @@ export function useWalletConnection(options: UseWalletConnectionOptions = {}): W
 type WalletConnectionManagerProps = Readonly<{
 	children: (state: WalletConnectionState) => ReactNode;
 	connectors?: readonly WalletConnector[];
-	discoveryOptions?: WalletStandardDiscoveryOptions;
 }>;
 
 /**
  * Render-prop helper that lets you easily wire wallet status into custom UIs.
  */
-export function WalletConnectionManager({ children, connectors, discoveryOptions }: WalletConnectionManagerProps) {
-	const state = useWalletConnection({ connectors, discoveryOptions });
+export function WalletConnectionManager({ children, connectors }: WalletConnectionManagerProps) {
+	const state = useWalletConnection({ connectors });
 	return <>{children(state)}</>;
 }
 

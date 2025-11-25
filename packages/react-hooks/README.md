@@ -394,9 +394,8 @@ function SimulationLogs({ transaction }) {
 ## Going further
 
 - Wallet connection UI: `useWalletConnection` gives you the current wallet, connect/disconnect
-  helpers, and the connector list (from `client.connectors` when provided, with optional Wallet
-  Standard discovery fallback). Pair it with your preferred UI, or `WalletConnectionManager` for a
-  simple modal state helper.
+  helpers, and the connector list from `client.connectors` (or an explicit override). Pair it with
+  your preferred UI, or `WalletConnectionManager` for a simple modal state helper.
 - Signing helpers: the wallet session returned by `useWallet` exposes `signMessage`,
   `signTransaction`, and `sendTransaction` when supported by the connector. These connector methods
   replace the deprecated Wallet Standard shims.
