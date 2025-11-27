@@ -4,6 +4,93 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  react:
+    react:
+      specifier: ^19.0.0
+      version: 19.2.0
+  solana:
+    '@solana-program/compute-budget':
+      specifier: ^0.9.0
+      version: 0.9.0
+    '@solana-program/system':
+      specifier: ^0.9.0
+      version: 0.9.0
+    '@solana-program/token':
+      specifier: ^0.5.1
+      version: 0.5.1
+    '@solana/addresses':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/codecs-core':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/codecs-strings':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/compat':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/errors':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/keys':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/kit':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/promises':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/signers':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/transaction-confirmation':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/transaction-messages':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/transactions':
+      specifier: ^5.0.0
+      version: 5.0.0
+    '@solana/wallet-standard-features':
+      specifier: ^1.3.0
+      version: 1.3.0
+    '@solana/web3.js':
+      specifier: ^1.95.3
+      version: 1.98.4
+    '@wallet-standard/app':
+      specifier: ^1.0.1
+      version: 1.1.0
+    '@wallet-standard/base':
+      specifier: ^1.1.0
+      version: 1.1.0
+    '@wallet-standard/errors':
+      specifier: ^0.1.1
+      version: 0.1.1
+    '@wallet-standard/features':
+      specifier: ^1.0.3
+      version: 1.1.0
+  typescript:
+    '@types/node':
+      specifier: ^24
+      version: 24.10.0
+    '@types/react':
+      specifier: ^19.0.0
+      version: 19.2.2
+    typescript:
+      specifier: ^5.6.3
+      version: 5.9.3
+  utils:
+    bs58:
+      specifier: ^6.0.0
+      version: 6.0.0
+    zustand:
+      specifier: ^5.0.0
+      version: 5.0.8
+
 importers:
 
   .:
@@ -118,130 +205,130 @@ importers:
   packages/client:
     dependencies:
       '@solana-program/compute-budget':
-        specifier: ^0.9.0
+        specifier: catalog:solana
         version: 0.9.0(@solana/kit@5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       '@solana-program/system':
-        specifier: ^0.9.0
+        specifier: catalog:solana
         version: 0.9.0(@solana/kit@5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       '@solana-program/token':
-        specifier: ^0.5.1
+        specifier: catalog:solana
         version: 0.5.1(@solana/kit@5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       '@solana/codecs-strings':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/kit':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/transaction-confirmation':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/transactions':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/wallet-standard-features':
-        specifier: ^1.3.0
+        specifier: catalog:solana
         version: 1.3.0
       '@wallet-standard/app':
-        specifier: ^1.0.1
+        specifier: catalog:solana
         version: 1.1.0
       '@wallet-standard/base':
-        specifier: ^1.1.0
+        specifier: catalog:solana
         version: 1.1.0
       '@wallet-standard/errors':
-        specifier: ^0.1.1
+        specifier: catalog:solana
         version: 0.1.1
       '@wallet-standard/features':
-        specifier: ^1.0.3
+        specifier: catalog:solana
         version: 1.1.0
       bs58:
-        specifier: ^6.0.0
+        specifier: catalog:utils
         version: 6.0.0
       typescript:
         specifier: '>=5.3.3'
         version: 5.9.3
       zustand:
-        specifier: ^5.0.0
+        specifier: catalog:utils
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@types/node':
-        specifier: ^24
+        specifier: catalog:typescript
         version: 24.10.0
 
   packages/react-hooks:
     dependencies:
       '@solana/addresses':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/client':
         specifier: workspace:*
         version: link:../client
       '@solana/codecs-core':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(typescript@5.9.3)
       '@solana/errors':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(typescript@5.9.3)
       '@solana/keys':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/kit':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/promises':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(typescript@5.9.3)
       '@solana/signers':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/transaction-messages':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/transactions':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       swr:
         specifier: ^2.3.6
         version: 2.3.6(react@19.2.0)
       zustand:
-        specifier: ^5.0.0
+        specifier: catalog:utils
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@types/react':
-        specifier: ^19
+        specifier: catalog:typescript
         version: 19.2.2
       react:
-        specifier: ^19.0.0
+        specifier: catalog:react
         version: 19.2.0
 
   packages/web3-compat:
     dependencies:
       '@solana/addresses':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/client':
         specifier: workspace:*
         version: link:../client
       '@solana/compat':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/kit':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@solana/transactions':
-        specifier: ^5.0.0
+        specifier: catalog:solana
         version: 5.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)
       '@solana/web3.js':
-        specifier: ^1.95.3
+        specifier: catalog:solana
         version: 1.98.4(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)
       bs58:
-        specifier: ^6.0.0
+        specifier: catalog:utils
         version: 6.0.0
       typescript:
         specifier: '>=5.3.3'
         version: 5.9.3
     devDependencies:
       '@types/node':
-        specifier: ^24
+        specifier: catalog:typescript
         version: 24.10.0
 
   tests/types-smoke:
@@ -253,17 +340,17 @@ importers:
         specifier: workspace:*
         version: link:../../packages/react-hooks
       react:
-        specifier: ^19.0.0
+        specifier: catalog:react
         version: 19.2.0
     devDependencies:
       '@types/node':
-        specifier: ^24
+        specifier: catalog:typescript
         version: 24.10.0
       '@types/react':
-        specifier: ^19
+        specifier: catalog:typescript
         version: 19.2.2
       typescript:
-        specifier: ^5.6.3
+        specifier: catalog:typescript
         version: 5.9.3
 
   tests/web3-compat-parity-tests:

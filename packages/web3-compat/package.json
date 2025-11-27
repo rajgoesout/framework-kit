@@ -57,16 +57,16 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@solana/compat": "^5.0.0",
-		"@solana/addresses": "^5.0.0",
+		"@solana/compat": "catalog:solana",
+		"@solana/addresses": "catalog:solana",
 		"@solana/client": "workspace:*",
-		"@solana/kit": "^5.0.0",
-		"@solana/transactions": "^5.0.0",
-		"@solana/web3.js": "^1.95.3",
-		"bs58": "^6.0.0"
+		"@solana/kit": "catalog:solana",
+		"@solana/transactions": "catalog:solana",
+		"@solana/web3.js": "catalog:solana",
+		"bs58": "catalog:utils"
 	},
 	"devDependencies": {
-		"@types/node": "^24"
+		"@types/node": "catalog:typescript"
 	},
 	"peerDependencies": {
 		"typescript": ">=5.3.3"

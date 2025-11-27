@@ -11,11 +11,11 @@
 	"dependencies": {
 		"@solana/client": "workspace:*",
 		"@solana/react-hooks": "workspace:*",
-		"react": "^19.0.0"
+		"react": "catalog:react"
 	},
 	"devDependencies": {
-		"@types/node": "^24",
-		"@types/react": "^19",
-		"typescript": "^5.6.3"
+		"@types/node": "catalog:typescript",
+		"@types/react": "catalog:typescript",
+		"typescript": "catalog:typescript"
 	}
 }
