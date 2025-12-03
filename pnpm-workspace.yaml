@@ -21,6 +21,7 @@ catalogs:
     "@solana-program/system": "^0.9.0"
     "@solana-program/compute-budget": "^0.9.0"
     "@solana-program/token": "^0.5.1"
+    "@solana-program/address-lookup-table": "^0.10.0"
     "@wallet-standard/app": "^1.0.1"
     "@wallet-standard/base": "^1.1.0"
     "@wallet-standard/errors": "^0.1.1"

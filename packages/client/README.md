@@ -112,6 +112,31 @@ const signature = await usdc.sendTransfer({
 console.log(signature.toString());
 ```
 
+### Fetch address lookup tables
+
+```ts
+import { toAddress } from "@solana/client";
+
+// Single lookup table
+const lut = await client.actions.fetchLookupTable(
+  toAddress("AddressLookupTab1e1111111111111111111111111"),
+);
+console.log(`Addresses in LUT: ${lut.addresses.length}`);
+
+// Multiple lookup tables
+const luts = await client.actions.fetchLookupTables([lutAddress1, lutAddress2]);
+```
+
+### Fetch nonce accounts
+
+```ts
+const nonce = await client.actions.fetchNonceAccount(
+  toAddress("NonceAccountAddress111111111111111111111111"),
+);
+console.log(`Nonce: ${nonce.blockhash}`);
+console.log(`Authority: ${nonce.authority}`);
+```
+
 ### Build and send arbitrary transactions
 
 ```ts
@@ -156,7 +181,7 @@ watcher.abort();
 
 - Wallet connectors: `autoDiscover()` picks up Wallet Standard injectables; compose `phantom()`, `solflare()`, `backpack()`, or `injected()` when you need explicit control.
 - Store: built on Zustand; pass `createStore` to `createClient` for custom persistence or server-side stores. `serializeSolanaState` / `deserializeSolanaState` help save and restore cluster + wallet metadata.
-- Actions: `fetchAccount`, `fetchBalance`, `setCluster`, `requestAirdrop`, `sendTransaction`, and wallet connect/disconnect keep the store in sync.
+- Actions: `fetchAccount`, `fetchBalance`, `fetchLookupTable`, `fetchLookupTables`, `fetchNonceAccount`, `setCluster`, `requestAirdrop`, `sendTransaction`, and wallet connect/disconnect keep the store in sync.
 - Watchers: `watchAccount`, `watchBalance`, and `watchSignature` stream updates into the store and return an `abort()` handle for cleanup.
 - Helpers: `solTransfer`, `splToken`, and `transaction` cover common transfers plus low-level `prepare`/`sign`/`toWire` flows. Transaction versions default to `0` when any instruction references address lookup tables, otherwise `legacy`; override with `version` when needed.
 

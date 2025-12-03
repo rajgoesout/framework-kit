@@ -138,6 +138,42 @@ function TokenPanel({
 }
 ```
 
+### Fetch address lookup tables
+
+```tsx
+import { useLookupTable } from "@solana/react-hooks";
+
+function LookupTableInfo({ address }: { address: string }) {
+  const { data, isLoading, error } = useLookupTable(address);
+  if (isLoading) return <p>Loading…</p>;
+  if (error) return <p role="alert">Error loading LUT</p>;
+  return (
+    <div>
+      <p>Addresses in LUT: {data?.addresses.length ?? 0}</p>
+      <p>Authority: {data?.authority ?? "None"}</p>
+    </div>
+  );
+}
+```
+
+### Fetch nonce accounts
+
+```tsx
+import { useNonceAccount } from "@solana/react-hooks";
+
+function NonceInfo({ address }: { address: string }) {
+  const { data, isLoading, error } = useNonceAccount(address);
+  if (isLoading) return <p>Loading…</p>;
+  if (error) return <p role="alert">Error loading nonce</p>;
+  return (
+    <div>
+      <p>Nonce: {data?.blockhash}</p>
+      <p>Authority: {data?.authority}</p>
+    </div>
+  );
+}
+```
+
 ### Build and send arbitrary transactions
 
 ```tsx

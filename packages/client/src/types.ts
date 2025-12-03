@@ -122,6 +122,19 @@ export type AccountCacheEntry = Readonly<{
 
 export type AccountCache = Record<string, AccountCacheEntry>;
 
+export type AddressLookupTableData = Readonly<{
+	addresses: readonly Address[];
+	authority?: Address;
+	deactivationSlot: bigint;
+	lastExtendedSlot: bigint;
+	lastExtendedSlotStartIndex: number;
+}>;
+
+export type NonceAccountData = Readonly<{
+	authority: Address;
+	blockhash: string;
+}>;
+
 export type TransactionRecord = Readonly<{
 	error?: unknown;
 	lastUpdatedAt: number;
@@ -237,6 +250,27 @@ export type FetchBalanceParameters = Readonly<{
 
 export type FetchBalanceReturnType = Promise<Lamports>;
 
+export type FetchLookupTableParameters = Readonly<{
+	address: Address;
+	commitment?: Commitment;
+}>;
+
+export type FetchLookupTableReturnType = Promise<AddressLookupTableData>;
+
+export type FetchLookupTablesParameters = Readonly<{
+	addresses: readonly Address[];
+	commitment?: Commitment;
+}>;
+
+export type FetchLookupTablesReturnType = Promise<readonly AddressLookupTableData[]>;
+
+export type FetchNonceAccountParameters = Readonly<{
+	address: Address;
+	commitment?: Commitment;
+}>;
+
+export type FetchNonceAccountReturnType = Promise<NonceAccountData>;
+
 export type RequestAirdropParameters = Readonly<{
 	address: Address;
 	lamports: Lamports;
@@ -272,6 +306,18 @@ export type ClientActions = Readonly<{
 		address: FetchBalanceParameters['address'],
 		commitment?: FetchBalanceParameters['commitment'],
 	): FetchBalanceReturnType;
+	fetchLookupTable(
+		address: FetchLookupTableParameters['address'],
+		commitment?: FetchLookupTableParameters['commitment'],
+	): FetchLookupTableReturnType;
+	fetchLookupTables(
+		addresses: FetchLookupTablesParameters['addresses'],
+		commitment?: FetchLookupTablesParameters['commitment'],
+	): FetchLookupTablesReturnType;
+	fetchNonceAccount(
+		address: FetchNonceAccountParameters['address'],
+		commitment?: FetchNonceAccountParameters['commitment'],
+	): FetchNonceAccountReturnType;
 	requestAirdrop(
 		address: RequestAirdropParameters['address'],
 		lamports: RequestAirdropParameters['lamports'],

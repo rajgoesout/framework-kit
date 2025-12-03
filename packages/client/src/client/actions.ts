@@ -7,17 +7,27 @@ import type {
 	Signature,
 	Transaction,
 } from '@solana/kit';
-import { airdropFactory, getBase64EncodedWireTransaction } from '@solana/kit';
+import { airdropFactory, getBase64EncodedWireTransaction, isSome } from '@solana/kit';
 import type { TransactionWithLastValidBlockHeight } from '@solana/transaction-confirmation';
 import {
 	createBlockHeightExceedencePromiseFactory,
 	createRecentSignatureConfirmationPromiseFactory,
 	waitForRecentTransactionConfirmation,
 } from '@solana/transaction-confirmation';
+import { fetchAddressLookupTable, fetchAllAddressLookupTable } from '@solana-program/address-lookup-table';
+import { fetchNonce } from '@solana-program/system';
 
 import { createLogger, formatError } from '../logging/logger';
 import { createSolanaRpcClient } from '../rpc/createSolanaRpcClient';
-import type { ClientActions, ClientState, ClientStore, SolanaClientRuntime, WalletRegistry } from '../types';
+import type {
+	AddressLookupTableData,
+	ClientActions,
+	ClientState,
+	ClientStore,
+	NonceAccountData,
+	SolanaClientRuntime,
+	WalletRegistry,
+} from '../types';
 import { now } from '../utils';
 
 type MutableRuntime = SolanaClientRuntime;
@@ -373,6 +383,65 @@ export function createActions({ connectors, logger: inputLogger, runtime, store 
 	}
 
 	/**
+	 * Fetches an address lookup table.
+	 *
+	 * @param addr - Lookup table address.
+	 * @param commitment - Optional commitment override.
+	 * @returns Parsed lookup table data.
+	 */
+	async function fetchLookupTable(addr: Address, commitment?: Commitment): Promise<AddressLookupTableData> {
+		const account = await fetchAddressLookupTable(runtime.rpc, addr, {
+			commitment: getCommitment(commitment),
+		});
+		const { addresses, authority, deactivationSlot, lastExtendedSlot, lastExtendedSlotStartIndex } = account.data;
+		return {
+			addresses,
+			authority: isSome(authority) ? authority.value : undefined,
+			deactivationSlot,
+			lastExtendedSlot,
+			lastExtendedSlotStartIndex,
+		};
+	}
+
+	/**
+	 * Fetches multiple address lookup tables.
+	 *
+	 * @param addresses - Lookup table addresses.
+	 * @param commitment - Optional commitment override.
+	 * @returns Array of parsed lookup table data.
+	 */
+	async function fetchLookupTables(
+		addresses: readonly Address[],
+		commitment?: Commitment,
+	): Promise<readonly AddressLookupTableData[]> {
+		if (addresses.length === 0) return [];
+		const accounts = await fetchAllAddressLookupTable(runtime.rpc, addresses as Address[], {
+			commitment: getCommitment(commitment),
+		});
+		return accounts.map(({ data }) => ({
+			addresses: data.addresses,
+			authority: isSome(data.authority) ? data.authority.value : undefined,
+			deactivationSlot: data.deactivationSlot,
+			lastExtendedSlot: data.lastExtendedSlot,
+			lastExtendedSlotStartIndex: data.lastExtendedSlotStartIndex,
+		}));
+	}
+
+	/**
+	 * Fetches a nonce account.
+	 *
+	 * @param addr - Nonce account address.
+	 * @param commitment - Optional commitment override.
+	 * @returns Parsed nonce data.
+	 */
+	async function fetchNonceAccount(addr: Address, commitment?: Commitment): Promise<NonceAccountData> {
+		const account = await fetchNonce(runtime.rpc, addr, {
+			commitment: getCommitment(commitment),
+		});
+		return { authority: account.data.authority, blockhash: account.data.blockhash };
+	}
+
+	/**
 	 * Sends a transaction and waits for confirmation using the runtime helpers.
 	 *
 	 * @param transaction - Transaction to submit.
@@ -495,6 +564,9 @@ export function createActions({ connectors, logger: inputLogger, runtime, store 
 		disconnectWallet,
 		fetchAccount,
 		fetchBalance,
+		fetchLookupTable,
+		fetchLookupTables,
+		fetchNonceAccount,
 		requestAirdrop,
 		sendTransaction,
 		setCluster,

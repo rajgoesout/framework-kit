@@ -1,4 +1,6 @@
+import { LookupTableCard } from './components/lookup-table-card';
 import { MemoCard } from './components/memo-card';
+import { NonceCard } from './components/nonce-card';
 import { WalletConnectButton } from './components/wallet-connect-button';
 
 export default function HomePage() {
@@ -23,6 +25,8 @@ export default function HomePage() {
 				</div>
 			</section>
 			<MemoCard />
+			<NonceCard />
+			<LookupTableCard />
 		</main>
 	);
 }

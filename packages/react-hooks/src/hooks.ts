@@ -1,6 +1,7 @@
 import {
 	type AccountCacheEntry,
 	type AddressLike,
+	type AddressLookupTableData,
 	type AsyncState,
 	type ClientState,
 	type ConfirmationCommitment,
@@ -12,6 +13,7 @@ import {
 	createTransactionPoolController,
 	deriveConfirmationStatus,
 	type LatestBlockhashCache,
+	type NonceAccountData,
 	normalizeSignature,
 	SIGNATURE_STATUS_TIMEOUT_MS,
 	type SignatureLike,
@@ -998,6 +1000,70 @@ export function useWaitForSignature(
 	};
 }
 
+type UseLookupTableOptions = Readonly<{
+	commitment?: Commitment;
+	swr?: Omit<SWRConfiguration<AddressLookupTableData, unknown, BareFetcher<AddressLookupTableData>>, 'suspense'>;
+}>;
+
+/**
+ * Fetch an address lookup table.
+ *
+ * @example
+ * ```ts
+ * const { data, isLoading, error } = useLookupTable(lutAddress);
+ * ```
+ */
+export function useLookupTable(
+	addressLike?: AddressLike,
+	options: UseLookupTableOptions = {},
+): SolanaQueryResult<AddressLookupTableData> {
+	const addr = useMemo(() => (addressLike ? toAddress(addressLike) : undefined), [addressLike]);
+	const key = addr?.toString() ?? null;
+	const fetcher = useCallback(
+		async (c: SolanaClient) => {
+			if (!addr) throw new Error('Address required');
+			return c.actions.fetchLookupTable(addr, options.commitment);
+		},
+		[addr, options.commitment],
+	);
+	return useSolanaRpcQuery<AddressLookupTableData>('lookupTable', [key, options.commitment], fetcher, {
+		disabled: !addr,
+		swr: options.swr,
+	});
+}
+
+type UseNonceAccountOptions = Readonly<{
+	commitment?: Commitment;
+	swr?: Omit<SWRConfiguration<NonceAccountData, unknown, BareFetcher<NonceAccountData>>, 'suspense'>;
+}>;
+
+/**
+ * Fetch a nonce account.
+ *
+ * @example
+ * ```ts
+ * const { data, isLoading, error } = useNonceAccount(nonceAddress);
+ * ```
+ */
+export function useNonceAccount(
+	addressLike?: AddressLike,
+	options: UseNonceAccountOptions = {},
+): SolanaQueryResult<NonceAccountData> {
+	const addr = useMemo(() => (addressLike ? toAddress(addressLike) : undefined), [addressLike]);
+	const key = addr?.toString() ?? null;
+	const fetcher = useCallback(
+		async (c: SolanaClient) => {
+			if (!addr) throw new Error('Address required');
+			return c.actions.fetchNonceAccount(addr, options.commitment);
+		},
+		[addr, options.commitment],
+	);
+	return useSolanaRpcQuery<NonceAccountData>('nonceAccount', [key, options.commitment], fetcher, {
+		disabled: !addr,
+		swr: options.swr,
+	});
+}
+
 // Public hook type aliases for consistency
 export type UseAccountParameters = Readonly<{ address?: AddressLike; options?: UseAccountOptions }>;
 export type UseAccountReturnType = ReturnType<typeof useAccount>;
@@ -1045,3 +1111,9 @@ export type UseWalletSessionReturnType = ReturnType<typeof useWalletSession>;
 
 export type UseWalletActionsParameters = undefined;
 export type UseWalletActionsReturnType = ReturnType<typeof useWalletActions>;
+
+export type UseLookupTableParameters = Readonly<{ address?: AddressLike; options?: UseLookupTableOptions }>;
+export type UseLookupTableReturnType = ReturnType<typeof useLookupTable>;
+
+export type UseNonceAccountParameters = Readonly<{ address?: AddressLike; options?: UseNonceAccountOptions }>;
+export type UseNonceAccountReturnType = ReturnType<typeof useNonceAccount>;

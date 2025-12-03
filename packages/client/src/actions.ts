@@ -7,6 +7,12 @@ import type {
 	FetchAccountReturnType,
 	FetchBalanceParameters,
 	FetchBalanceReturnType,
+	FetchLookupTableParameters,
+	FetchLookupTableReturnType,
+	FetchLookupTablesParameters,
+	FetchLookupTablesReturnType,
+	FetchNonceAccountParameters,
+	FetchNonceAccountReturnType,
 	RequestAirdropParameters,
 	RequestAirdropReturnType,
 	SendTransactionParameters,
@@ -57,6 +63,42 @@ export function fetchAccount(client: SolanaClient, params: FetchAccountParameter
  */
 export function fetchBalance(client: SolanaClient, params: FetchBalanceParameters): FetchBalanceReturnType {
 	return client.actions.fetchBalance(params.address, params.commitment);
+}
+
+/**
+ * Fetch an address lookup table.
+ *
+ * @param client - Solana client instance.
+ * @param params - Lookup table address and optional commitment override.
+ */
+export function fetchLookupTable(client: SolanaClient, params: FetchLookupTableParameters): FetchLookupTableReturnType {
+	return client.actions.fetchLookupTable(params.address, params.commitment);
+}
+
+/**
+ * Fetch multiple address lookup tables.
+ *
+ * @param client - Solana client instance.
+ * @param params - Lookup table addresses and optional commitment override.
+ */
+export function fetchLookupTables(
+	client: SolanaClient,
+	params: FetchLookupTablesParameters,
+): FetchLookupTablesReturnType {
+	return client.actions.fetchLookupTables(params.addresses, params.commitment);
+}
+
+/**
+ * Fetch a nonce account.
+ *
+ * @param client - Solana client instance.
+ * @param params - Nonce account address and optional commitment override.
+ */
+export function fetchNonceAccount(
+	client: SolanaClient,
+	params: FetchNonceAccountParameters,
+): FetchNonceAccountReturnType {
+	return client.actions.fetchNonceAccount(params.address, params.commitment);
 }
 
 /**
